@@ -64,3 +64,19 @@ func (s *accountService) GetAccount(ctx context.Context, documentNumber string) 
 
 	return acc, nil
 }
+func (s *accountService) GetAccountByID(ctx context.Context, accountID int64) (*domain.Account, error) {
+	acc, err := s.repo.FindByAccountID(ctx, accountID)
+	if err != nil {
+		var de *domainerror.DomainError
+		if errors.As(err, &de) {
+			return nil, err
+		}
+		return nil, domainerror.NewInternalError("failed to fetch account", err)
+	}
+
+	if acc == nil {
+		return nil, domainerror.NewNotFoundError("account not found", nil)
+	}
+
+	return acc, nil
+}
