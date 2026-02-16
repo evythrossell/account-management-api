@@ -50,9 +50,10 @@ func (r *accountRepository) FindByDocument(ctx context.Context, documentNumber s
 }
 
 func (r *accountRepository) FindByAccountID(ctx context.Context, accountID int64) (*domain.Account, error) {
+	stmt := `SELECT account_id, document_number FROM accounts WHERE account_id = $1`
 	var acc domain.Account
-	row := r.db.QueryRowContext(ctx, "SELECT account_id, document_number FROM accounts WHERE account_id=$1", accountID)
-	if err := row.Scan(&acc.ID, &acc.DocumentNumber); err != nil {
+	err := r.db.QueryRowContext(ctx, stmt, accountID).Scan(&acc.ID, &acc.DocumentNumber)
+	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}

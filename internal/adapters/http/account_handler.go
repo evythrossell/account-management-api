@@ -69,30 +69,15 @@ func (h *AccountHandler) GetAccount(c *gin.Context) {
 	}
 
 	accountID, parseErr := strconv.ParseInt(accountIdStr, 10, 64)
-
-	if parseErr == nil && accountID > 0 {
-		account, err := h.service.GetAccountByID(c.Request.Context(), accountID)
-		if err == nil {
-			c.JSON(http.StatusOK, account)
-			return
-		}
-
-		var de *domainerror.DomainError
-		if errors.As(err, &de) {
-			c.JSON(de.HTTPStatusCode(), ErrorResponse{
-				Code:    de.Code,
-				Message: de.PublicMessage(),
-			})
-			return
-		}
-		c.JSON(http.StatusInternalServerError, ErrorResponse{
-			Code:    "INTERNAL_ERROR",
-			Message: "An unexpected error occurred",
+	if parseErr != nil || accountID <= 0 {
+		c.JSON(http.StatusBadRequest, ErrorResponse{
+			Code:    "VALIDATION_ERROR",
+			Message: "invalid accountId",
 		})
 		return
 	}
 
-	account, err := h.service.GetAccount(c.Request.Context(), accountIdStr)
+	account, err := h.service.GetAccountByID(c.Request.Context(), accountID)
 	if err == nil {
 		c.JSON(http.StatusOK, account)
 		return
@@ -106,7 +91,6 @@ func (h *AccountHandler) GetAccount(c *gin.Context) {
 		})
 		return
 	}
-
 	c.JSON(http.StatusInternalServerError, ErrorResponse{
 		Code:    "INTERNAL_ERROR",
 		Message: "An unexpected error occurred",
