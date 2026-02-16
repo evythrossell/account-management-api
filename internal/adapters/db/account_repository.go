@@ -11,19 +11,15 @@ import (
 	"github.com/lib/pq"
 )
 
-var (
-	ErrDuplicateDocument = errors.New("document already exists")
-)
-
-type AccountRepository struct {
+type accountRepository struct {
 	db *sql.DB
 }
 
-func NewAccountRepository(db *sql.DB) *AccountRepository {
-	return &AccountRepository{db: db}
+func NewAccountRepository(db *sql.DB) *accountRepository {
+	return &accountRepository{db: db}
 }
 
-func (r *AccountRepository) Save(ctx context.Context, account *domain.Account) (*domain.Account, error) {
+func (r *accountRepository) Save(ctx context.Context, account *domain.Account) (*domain.Account, error) {
 	stmt := `INSERT INTO accounts (document_number) VALUES ($1) RETURNING account_id`
 
 	err := r.db.QueryRowContext(ctx, stmt, account.DocumentNumber).Scan(&account.ID)
@@ -39,7 +35,7 @@ func (r *AccountRepository) Save(ctx context.Context, account *domain.Account) (
 	return account, nil
 }
 
-func (r *AccountRepository) FindByDocument(ctx context.Context, documentNumber string) (*domain.Account, error) {
+func (r *accountRepository) FindByDocument(ctx context.Context, documentNumber string) (*domain.Account, error) {
 	stmt := `SELECT account_id, document_number FROM accounts WHERE document_number = $1`
 
 	var acc domain.Account
@@ -49,6 +45,18 @@ func (r *AccountRepository) FindByDocument(ctx context.Context, documentNumber s
 			return nil, nil
 		}
 		return nil, fmt.Errorf("find account by document: %w", err)
+	}
+	return &acc, nil
+}
+
+func (r *accountRepository) FindByAccountID(ctx context.Context, accountID int64) (*domain.Account, error) {
+	var acc domain.Account
+	row := r.db.QueryRowContext(ctx, "SELECT account_id, document_number FROM accounts WHERE account_id=$1", accountID)
+	if err := row.Scan(&acc.ID, &acc.DocumentNumber); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("find account by id: %w", err)
 	}
 	return &acc, nil
 }
