@@ -3,21 +3,22 @@ package container
 import (
 	"database/sql"
 
-	logger "github.com/evythrossell/account-management-api/internal/adapters/logger"
+	"github.com/evythrossell/account-management-api/config"
 	dbadapter "github.com/evythrossell/account-management-api/internal/adapters/db"
 	httpadapter "github.com/evythrossell/account-management-api/internal/adapters/http"
+	logger "github.com/evythrossell/account-management-api/internal/adapters/logger"
 	"github.com/evythrossell/account-management-api/internal/core/ports"
 	services "github.com/evythrossell/account-management-api/internal/core/services"
-	"github.com/evythrossell/account-management-api/config"
 	_ "github.com/lib/pq"
 )
 
 type Container struct {
-	logger logger.Logger
-	db     *sql.DB
+	logger            logger.Logger
+	db                *sql.DB
 	accountRepository ports.AccountRepository
-	accountService ports.AccountService
-	accountHandler *httpadapter.AccountHandler
+	accountService    ports.AccountService
+	accountHandler    *httpadapter.AccountHandler
+	healthHandler     *httpadapter.HealthHandler
 }
 
 func New(cfg *config.Config, logger logger.Logger) (*Container, error) {
@@ -45,6 +46,9 @@ func New(cfg *config.Config, logger logger.Logger) (*Container, error) {
 
 	c.accountHandler = httpadapter.NewAccountHandler(c.accountService)
 	c.logger.Info("handlers initialized")
+
+	c.healthHandler = httpadapter.NewHealthHandler(c.db)
+	c.logger.Info("health handler initialized")
 
 	return c, nil
 }
@@ -74,4 +78,8 @@ func (c *Container) AccountService() ports.AccountService {
 
 func (c *Container) AccountHandler() *httpadapter.AccountHandler {
 	return c.accountHandler
+}
+
+func (c *Container) HealthHandler() *httpadapter.HealthHandler {
+	return c.healthHandler
 }
