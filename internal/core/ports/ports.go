@@ -13,4 +13,5 @@ type AccountRepository interface {
 
 type AccountService interface {
 	CreateAccount(ctx context.Context, documentNumber string) (*domain.Account, error)
+	GetAccount(ctx context.Context, documentNumber string) (*domain.Account, error)
 }
