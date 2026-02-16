@@ -28,7 +28,7 @@ func main() {
 	}
 	defer ctr.Close()
 
-	router := httpadapter.SetupRouter(ctr.AccountHandler())
+	router := httpadapter.SetupRouter(ctr.AccountHandler(), ctr.HealthHandler(), ctr.TransactionHandler())
 
 	srv := &http.Server{
 		Addr:    ":" + cfg.ServerPort,
