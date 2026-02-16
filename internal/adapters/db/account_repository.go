@@ -3,8 +3,16 @@ package db
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 
 	"github.com/evythrossell/account-management-api/internal/core/domain"
+	domainerror "github.com/evythrossell/account-management-api/internal/core/error"
+	"github.com/lib/pq"
+)
+
+var (
+	ErrDuplicateDocument = errors.New("document already exists")
 )
 
 type AccountRepository struct {
@@ -20,7 +28,13 @@ func (r *AccountRepository) Save(ctx context.Context, account *domain.Account) (
 
 	err := r.db.QueryRowContext(ctx, stmt, account.DocumentNumber).Scan(&account.ID)
 	if err != nil {
-		return nil, err
+		var pgErr *pq.Error
+		if errors.As(err, &pgErr) {
+			if pgErr.Code == "23505" {
+				return nil, domainerror.NewConflictError("document number already registered", err)
+			}
+		}
+		return nil, fmt.Errorf("save account: %w", err)
 	}
 	return account, nil
 }
@@ -31,10 +45,10 @@ func (r *AccountRepository) FindByDocument(ctx context.Context, documentNumber s
 	var acc domain.Account
 	err := r.db.QueryRowContext(ctx, stmt, documentNumber).Scan(&acc.ID, &acc.DocumentNumber)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
-		return nil, err
+		return nil, fmt.Errorf("find account by document: %w", err)
 	}
 	return &acc, nil
 }

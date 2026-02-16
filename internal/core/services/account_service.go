@@ -2,8 +2,10 @@ package services
 
 import (
 	"context"
+	"errors"
 
 	"github.com/evythrossell/account-management-api/internal/core/domain"
+	domainerror "github.com/evythrossell/account-management-api/internal/core/error"
 	"github.com/evythrossell/account-management-api/internal/core/ports"
 )
 
@@ -16,11 +18,32 @@ func NewAccountService(r ports.AccountRepository) ports.AccountService {
 }
 
 func (s *accountService) CreateAccount(ctx context.Context, documentNumber string) (*domain.Account, error) {
-	hasAccount, _ := s.repo.FindByDocument(ctx, documentNumber)
-	if hasAccount != nil {
-		return nil, domain.ErrAccountAlreadyExists
+	acc := &domain.Account{DocumentNumber: documentNumber}
+	if err := acc.Validate(); err != nil {
+		return nil, err
 	}
 
-	acc := &domain.Account{DocumentNumber: documentNumber}
-	return s.repo.Save(ctx, acc)
+	existingAccount, err := s.repo.FindByDocument(ctx, documentNumber)
+	if err != nil {
+		var de *domainerror.DomainError
+		if errors.As(err, &de) {
+			return nil, err
+		}
+		return nil, domainerror.NewInternalError("failed to check account existence", err)
+	}
+
+	if existingAccount != nil {
+		return nil, domainerror.NewConflictError("document number already registered", nil)
+	}
+
+	savedAccount, err := s.repo.Save(ctx, acc)
+	if err != nil {
+		var de *domainerror.DomainError
+		if errors.As(err, &de) {
+			return nil, err
+		}
+		return nil, domainerror.NewInternalError("failed to save account", err)
+	}
+
+	return savedAccount, nil
 }
