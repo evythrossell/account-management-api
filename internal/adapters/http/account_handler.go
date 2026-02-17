@@ -7,6 +7,7 @@ import (
 
 	domainerror "github.com/evythrossell/account-management-api/internal/core/error"
 	"github.com/evythrossell/account-management-api/internal/core/ports"
+	validator "github.com/evythrossell/account-management-api/internal/core/domain/validator"
 	"github.com/gin-gonic/gin"
 )
 
@@ -30,9 +31,13 @@ type ErrorResponse struct {
 func (h *AccountHandler) CreateAccount(c *gin.Context) {
 	var req CreateAccountRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, ErrorResponse{
-			Code:    "VALIDATION_ERROR",
-			Message: "Invalid request format",
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+		return
+	}
+
+	if !validator.IsValidDocument(req.DocumentNumber) {
+		c.JSON(http.StatusUnprocessableEntity, gin.H{
+			"error": "document_number must contain only digits and be 11 or 14 chars long"
 		})
 		return
 	}
