@@ -31,7 +31,7 @@ type ErrorResponse struct {
 func (h *AccountHandler) CreateAccount(c *gin.Context) {
 	var req CreateAccountRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "JSON inválido"})
 		return
 	}
 
@@ -63,41 +63,21 @@ func (h *AccountHandler) CreateAccount(c *gin.Context) {
 }
 
 func (h *AccountHandler) GetAccount(c *gin.Context) {
-	accountIdStr := c.Param("accountId")
-
-	if accountIdStr == "" {
-		c.JSON(http.StatusBadRequest, ErrorResponse{
-			Code:    "VALIDATION_ERROR",
-			Message: "accountId is required",
-		})
-		return
-	}
-
-	accountID, parseErr := strconv.ParseInt(accountIdStr, 10, 64)
-	if parseErr != nil || accountID <= 0 {
-		c.JSON(http.StatusBadRequest, ErrorResponse{
-			Code:    "VALIDATION_ERROR",
-			Message: "invalid accountId",
-		})
+	accountIdParam := c.Param("accountId")
+	id, err := strconv.Atoi(accountIdParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "ID de conta inválido. Deve ser um número."})
 		return
 	}
 
 	account, err := h.service.GetAccountByID(c.Request.Context(), accountID)
-	if err == nil {
-		c.JSON(http.StatusOK, account)
+	if err != nil {
+		if err == domain.ErrAccountNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Conta não encontrada"})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Erro interno no servidor"})
 		return
 	}
-
-	var de *domainerror.DomainError
-	if errors.As(err, &de) {
-		c.JSON(de.HTTPStatusCode(), ErrorResponse{
-			Code:    de.Code,
-			Message: de.PublicMessage(),
-		})
-		return
-	}
-	c.JSON(http.StatusInternalServerError, ErrorResponse{
-		Code:    "INTERNAL_ERROR",
-		Message: "An unexpected error occurred",
-	})
+	c.JSON(http.StatusOK, account)
 }
