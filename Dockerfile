@@ -1,4 +1,4 @@
-FROM golang:1.23-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
 
@@ -7,7 +7,7 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /account-management-api main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /account-management-api ./cmd/main.go
 
 FROM scratch
 
