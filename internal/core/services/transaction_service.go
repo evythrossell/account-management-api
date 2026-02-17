@@ -85,3 +85,33 @@ func (s *transactionService) CreateTransaction(
 	}
 	return saved, nil
 }
+
+func (s *transactionService) GetByTransactionID(
+	ctx context.Context, 
+	transactionID int64,
+) (*domain.Transaction, error) {
+
+	if transactionID <= 0 {
+		return nil, domainerror.NewValidationError(
+			"invalid transaction_id", 
+			nil,
+		)
+	}
+
+	tx, err := s.txRepo.FindByTransactionID(ctx, transactionID)
+
+	if err != nil {
+		return nil, domainerror.NewInternalError(
+			"failed to fetch transaction", 
+			err,
+		)
+	}
+
+	if tx == nil {
+		return nil, domainerror.NewNotFoundError(
+			"transaction not found", 
+			nil,
+		)
+	}
+	return tx, nil
+}
