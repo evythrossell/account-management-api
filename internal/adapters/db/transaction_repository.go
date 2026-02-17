@@ -37,3 +37,18 @@ func (r *transactionRepository) Save(ctx context.Context, transaction *domain.Tr
 	}
 	return transaction, nil
 }
+
+func (r *transactionRepository) FindByTransactionID(ctx context.Context, transactionID int64) (*domain.Transaction, error) {
+	stmt := `SELECT transaction_id, account_id, operation_type_id, amount FROM transactions WHERE transaction_id = $1`
+	row := r.db.QueryRowContext(ctx, stmt, transactionID)
+
+	var tx domain.Transaction
+	err := row.Scan(&tx.TransactionID, &tx.AccountID, &tx.OperationTypeID, &tx.Amount)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("find transaction by transaction id: %w", err)
+	}
+	return &tx, nil
+}

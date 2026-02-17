@@ -11,6 +11,7 @@ func SetupRouter(accountHandler *AccountHandler, healthHandler *HealthHandler, t
 	router.GET("/accounts/:accountId", accountHandler.GetAccount)
 
 	router.POST("/transactions", transactionHandler.CreateTransaction)
+	router.GET("/transactions/:transactionId", transactionHandler.GetTransaction)
 
 	router.GET("/health", healthHandler.Check)
 
