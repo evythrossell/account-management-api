@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"time"
+	"strconv"
 
 	domainerror "github.com/evythrossell/account-management-api/internal/core/error"
 	"github.com/evythrossell/account-management-api/internal/core/ports"
@@ -46,4 +47,30 @@ func (h *TransactionHandler) CreateTransaction(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusCreated, tx)
+}
+
+
+func (h *TransactionHandler) GetTransaction(c *gin.Context) {
+	transactionID, err := strconv.ParseInt(c.Param("transactionId"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": "VALIDATION_ERROR", "message": "invalid transactionId"})
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+	defer cancel()
+
+	transaction, err := h.t.GetByTransactionID(
+		ctx,
+		transactionID,
+	)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"code":    "INTERNAL_ERROR",
+			"message": "internal server error",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, transaction)
 }

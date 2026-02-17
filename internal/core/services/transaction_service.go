@@ -17,16 +17,35 @@ type transactionService struct {
 	opRepo  ports.OperationRepository
 }
 
-func NewTransactionService(db *sql.DB, ar ports.AccountRepository, tr ports.TransactionRepository, or ports.OperationRepository) ports.TransactionService {
-	return &transactionService{db: db, accRepo: ar, txRepo: tr, opRepo: or}
+func NewTransactionService(
+	db *sql.DB, 
+	ar ports.AccountRepository, 
+	tr ports.TransactionRepository, 
+	or ports.OperationRepository,
+) ports.TransactionService {
+	return &transactionService{
+		db: db, 
+		accRepo: ar, 
+		txRepo: tr, 
+		opRepo: or,
+	}
 }
 
-func (s *transactionService) CreateTransaction(ctx context.Context, accountID int64, operationType int16, amount float64) (*domain.Transaction, error) {
+func (s *transactionService) CreateTransaction(
+	ctx context.Context, 
+	accountID int64, 
+	operationType int16, 
+	amount float64,
+) (*domain.Transaction, error) {
+
 	if accountID <= 0 {
-		return nil, domainerror.NewInternalError("invalid account_id", nil)
+		return nil, domainerror.NewValidationError("invalid account_id", nil)
 	}
 	if operationType <= 0 {
 		return nil, domainerror.NewValidationError("invalid operation_type_id", nil)
+	}
+	if amount == 0 {
+		return nil, domainerror.NewValidationError("amount cannot be zero", nil)
 	}
 
 	acc, err := s.accRepo.FindByAccountID(ctx, accountID)
@@ -45,10 +64,18 @@ func (s *transactionService) CreateTransaction(ctx context.Context, accountID in
 		return nil, domainerror.NewValidationError("invalid operation_type_id", nil)
 	}
 
+	normalizedAmount, err := domain.NormalizeAmount(
+		domain.OperationTypeID(operationType),
+		amount,
+	)
+	if err != nil {
+		return nil, domainerror.NewValidationError(err.Error(), nil)
+	}
+
 	transaction := &domain.Transaction{
 		AccountID:       accountID,
 		OperationTypeID: operationType,
-		Amount:          amount,
+		Amount:          normalizedAmount,
 		EventDate:       time.Now().UTC(),
 	}
 
@@ -57,4 +84,34 @@ func (s *transactionService) CreateTransaction(ctx context.Context, accountID in
 		return nil, domainerror.NewInternalError("failed to persist transaction", err)
 	}
 	return saved, nil
+}
+
+func (s *transactionService) GetByTransactionID(
+	ctx context.Context, 
+	transactionID int64,
+) (*domain.Transaction, error) {
+
+	if transactionID <= 0 {
+		return nil, domainerror.NewValidationError(
+			"invalid transaction_id", 
+			nil,
+		)
+	}
+
+	tx, err := s.txRepo.FindByTransactionID(ctx, transactionID)
+
+	if err != nil {
+		return nil, domainerror.NewInternalError(
+			"failed to fetch transaction", 
+			err,
+		)
+	}
+
+	if tx == nil {
+		return nil, domainerror.NewNotFoundError(
+			"transaction not found", 
+			nil,
+		)
+	}
+	return tx, nil
 }
