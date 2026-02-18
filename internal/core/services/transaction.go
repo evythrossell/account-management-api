@@ -3,8 +3,8 @@ package services
 import (
 	"context"
 
+	common "github.com/evythrossell/account-management-api/internal/core/common"
 	"github.com/evythrossell/account-management-api/internal/core/domain"
-	domainerror "github.com/evythrossell/account-management-api/internal/core/domain/error"
 	"github.com/evythrossell/account-management-api/internal/core/ports"
 )
 
@@ -43,7 +43,7 @@ func (service *transactionService) CreateTransaction(
 		return nil, err
 	}
 	if !exists {
-		return nil, domainerror.ErrInvalidOperation
+		return nil, common.ErrInvalidOperation
 	}
 
 	tx, err := domain.NewTransaction(accountID, opType, amount)

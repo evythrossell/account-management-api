@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	domainerror "github.com/evythrossell/account-management-api/internal/core/domain/error"
+	common "github.com/evythrossell/account-management-api/internal/core/common"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,7 +15,7 @@ func Error() gin.HandlerFunc {
 		if len(c.Errors) > 0 {
 			err := c.Errors.Last().Err
 
-			var de *domainerror.DomainError
+			var de *common.DomainError
 
 			if errors.As(err, &de) {
 				c.JSON(de.HTTPStatusCode(), gin.H{

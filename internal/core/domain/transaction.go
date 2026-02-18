@@ -4,7 +4,7 @@ import (
 	"math"
 	"time"
 
-	domainerror "github.com/evythrossell/account-management-api/internal/core/domain/error"
+	common "github.com/evythrossell/account-management-api/internal/core/common"
 )
 
 type Transaction struct {
@@ -17,11 +17,11 @@ type Transaction struct {
 
 func NewTransaction(accountID int64, opType OperationType, amount float64) (*Transaction, error) {
 	if amount <= 0 {
-		return nil, domainerror.ErrInvalidAmount
+		return nil, common.ErrInvalidAmount
 	}
 
 	if !opType.IsValid() {
-		return nil, domainerror.ErrInvalidOperation
+		return nil, common.ErrInvalidOperation
 	}
 
 	normalizedAmount := math.Abs(amount)
