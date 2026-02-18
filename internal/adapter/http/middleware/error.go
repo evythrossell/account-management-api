@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/evythrossell/account-management-api/internal/core/domain"
 	common "github.com/evythrossell/account-management-api/pkg"
 	"github.com/gin-gonic/gin"
 )
@@ -25,36 +26,36 @@ func Error() gin.HandlerFunc {
 			}
 			if errors.Is(err, common.ErrAccountNotFound) {
 				c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-					"code":    "NOT_FOUND_ERROR",
-					"message": "account not found",
+					"code":    domain.ErrCodeNotFound,
+					"message": domain.ErrMsgAccountNotFound,
 				})
 				return
 			}
 			if errors.Is(err, common.ErrTransactionNotFound) {
 				c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-					"code":    "NOT_FOUND_ERROR",
-					"message": "transaction not found",
+					"code":    domain.ErrCodeNotFound,
+					"message": domain.ErrMsgTransactionNotFound,
 				})
 				return
 			}
 			if errors.Is(err, common.ErrInvalidAmount) {
 				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-					"code":    "VALIDATION_ERROR",
-					"message": "amount must be greater than zero",
+					"code":    domain.ErrCodeValidation,
+					"message": domain.ErrMsgAmountInvalid,
 				})
 				return
 			}
 			if errors.Is(err, common.ErrInvalidOperation) {
 				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-					"code":    "VALIDATION_ERROR",
-					"message": "invalid operation type",
+					"code":    domain.ErrCodeValidation,
+					"message": domain.ErrMsgOperationTypeInvalid,
 				})
 				return
 			}
 
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-				"code":    "INTERNAL_SERVER_ERROR",
-				"message": "an unexpected error occurred",
+				"code":    domain.ErrCodeInternalError,
+				"message": domain.ErrMsgUnexpectedError,
 			})
 		}
 	}
