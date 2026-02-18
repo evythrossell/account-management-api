@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/evythrossell/account-management-api/internal/adapter/http/handler"
+	"github.com/evythrossell/account-management-api/internal/adapter/http/middleware"
 	"github.com/evythrossell/account-management-api/internal/core/domain"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -21,7 +22,19 @@ type MockAccountService struct {
 }
 
 func (m *MockAccountService) GetAccount(ctx context.Context, documentNumber string) (*domain.Account, error) {
-	panic("unimplemented")
+	args := m.Called(ctx, documentNumber)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*domain.Account), args.Error(1)
+}
+
+func (m *MockAccountService) GetAccountByDocument(ctx context.Context, documentNumber string) (*domain.Account, error) {
+	args := m.Called(ctx, documentNumber)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*domain.Account), args.Error(1)
 }
 
 func (m *MockAccountService) CreateAccount(ctx context.Context, doc string) (*domain.Account, error) {
@@ -111,6 +124,7 @@ func TestAccountHandler(t *testing.T) {
 	t.Run("GetAccount - Invalid ID", func(t *testing.T) {
 		h := handler.NewAccountHandler(nil)
 		r := gin.Default()
+		r.Use(middleware.Error())
 		r.GET("/accounts/:accountId", h.GetAccount)
 
 		req, _ := http.NewRequest("GET", "/accounts/abc", nil)

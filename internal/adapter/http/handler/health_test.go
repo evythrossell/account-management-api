@@ -38,7 +38,7 @@ func TestHealthHandler_Check(t *testing.T) {
 		h.Check(c)
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		assert.Contains(t, w.Body.String(), "ok")
+		assert.Contains(t, w.Body.String(), "up")
 		svc.AssertExpectations(t)
 	})
 

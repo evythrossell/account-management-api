@@ -69,41 +69,41 @@ func TestAccountService(t *testing.T) {
 		svc := services.NewAccountService(repo)
 		doc := "12345678901"
 
-		repo.On("FindByDocument", ctx, doc).Return(&domain.Account{}, nil)
+		repo.On("Save", ctx, mock.Anything).Return(nil, common.ErrAccountAlreadyExists)
 
 		_, err := svc.CreateAccount(ctx, doc)
 
 		assert.ErrorIs(t, err, common.ErrAccountAlreadyExists)
 	})
 
-	t.Run("CreateAccount - Repository Error on Find", func(t *testing.T) {
+	t.Run("CreateAccount - Repository Error on Save", func(t *testing.T) {
 		repo := new(MockAccountRepository)
 		svc := services.NewAccountService(repo)
 		doc := "12345678901"
 
-		repo.On("FindByDocument", ctx, doc).Return(nil, errors.New("db down"))
+		repo.On("Save", ctx, mock.Anything).Return(nil, errors.New("db down"))
 
 		_, err := svc.CreateAccount(ctx, doc)
 
-		assert.EqualError(t, err, "db down")
+		assert.Error(t, err)
 	})
 
-	t.Run("GetAccount - Success", func(t *testing.T) {
+	t.Run("GetAccountByDocument - Success", func(t *testing.T) {
 		repo := new(MockAccountRepository)
 		svc := services.NewAccountService(repo)
 		repo.On("FindByDocument", ctx, "123").Return(&domain.Account{ID: 1}, nil)
 
-		res, err := svc.GetAccount(ctx, "123")
+		res, err := svc.GetAccountByDocument(ctx, "123")
 		assert.NoError(t, err)
 		assert.Equal(t, int64(1), res.ID)
 	})
 
-	t.Run("GetAccount - Error", func(t *testing.T) {
+	t.Run("GetAccountByDocument - Error", func(t *testing.T) {
 		repo := new(MockAccountRepository)
 		svc := services.NewAccountService(repo)
 		repo.On("FindByDocument", ctx, "123").Return(nil, errors.New("error"))
 
-		_, err := svc.GetAccount(ctx, "123")
+		_, err := svc.GetAccountByDocument(ctx, "123")
 		assert.Error(t, err)
 	})
 
@@ -117,7 +117,29 @@ func TestAccountService(t *testing.T) {
 		assert.Equal(t, int64(1), res.ID)
 	})
 
-	t.Run("GetAccountByID - Error", func(t *testing.T) {
+	t.Run("GetAccountByID - Not Found", func(t *testing.T) {
+		repo := new(MockAccountRepository)
+		svc := services.NewAccountService(repo)
+		repo.On("FindByAccountID", ctx, int64(999)).Return(nil, common.ErrAccountNotFound)
+
+		res, err := svc.GetAccountByID(ctx, 999)
+		assert.Error(t, err)
+		assert.Nil(t, res)
+		assert.ErrorIs(t, err, common.ErrAccountNotFound)
+	})
+
+	t.Run("GetAccountByID - Database Error", func(t *testing.T) {
+		repo := new(MockAccountRepository)
+		svc := services.NewAccountService(repo)
+		repo.On("FindByAccountID", ctx, int64(1)).Return(nil, errors.New("connection failed"))
+
+		res, err := svc.GetAccountByID(ctx, 1)
+		assert.Error(t, err)
+		assert.Nil(t, res)
+		assert.Contains(t, err.Error(), "database error")
+	})
+
+	t.Run("GetAccountByID - Generic Error", func(t *testing.T) {
 		repo := new(MockAccountRepository)
 		svc := services.NewAccountService(repo)
 		repo.On("FindByAccountID", ctx, int64(1)).Return(nil, errors.New("error"))

@@ -1,3 +1,19 @@
+// @title           Account Management API
+// @version         1.0
+// @description     RESTful API para gerenciamento de contas bancárias
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name    Support
+// @contact.url     http://example.com/support
+// @contact.email   support@example.com
+
+// @license.name    Apache 2.0
+// @license.url     http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host            localhost:8080
+// @BasePath        /
+// @schemes         http
+
 package main
 
 import (
@@ -12,6 +28,8 @@ import (
 	config "github.com/evythrossell/account-management-api/internal/infrastructure"
 	"github.com/evythrossell/account-management-api/internal/infrastructure/container"
 	logger "github.com/evythrossell/account-management-api/pkg"
+	
+	_ "github.com/evythrossell/account-management-api/docs"
 )
 
 func main() {

@@ -1,0 +1,270 @@
+basePath: /
+definitions:
+  domain.Account:
+    properties:
+      account_id:
+        type: integer
+      document_number:
+        type: string
+    type: object
+  domain.OperationType:
+    enum:
+    - 1
+    - 2
+    - 3
+    - 4
+    format: int32
+    type: integer
+    x-enum-varnames:
+    - Purchase
+    - InstallmentPurchase
+    - Withdrawal
+    - Payment
+  domain.Transaction:
+    properties:
+      account_id:
+        type: integer
+      amount:
+        type: number
+      operation_type_id:
+        $ref: '#/definitions/domain.OperationType'
+      transaction_id:
+        type: integer
+    type: object
+  handler.BadRequestError:
+    properties:
+      code:
+        example: VALIDATION_ERROR
+        type: string
+      message:
+        example: document_number is required
+        type: string
+    type: object
+  handler.CreateAccountRequest:
+    properties:
+      document_number:
+        example: "12345678901"
+        type: string
+    required:
+    - document_number
+    type: object
+  handler.HealthResponse:
+    properties:
+      detail:
+        example: database connection failed
+        type: string
+      status:
+        example: up
+        type: string
+    type: object
+  handler.InternalServerError:
+    properties:
+      code:
+        example: INTERNAL_ERROR
+        type: string
+      message:
+        example: unexpected error on internal service
+        type: string
+    type: object
+  handler.NotFoundError:
+    properties:
+      code:
+        example: NOT_FOUND
+        type: string
+      message:
+        example: account not found
+        type: string
+    type: object
+  handler.ServiceUnavailableError:
+    properties:
+      detail:
+        example: database connection failed
+        type: string
+      status:
+        example: unavailable
+        type: string
+    type: object
+  handler.createTransactionRequest:
+    properties:
+      account_id:
+        example: 123
+        type: integer
+      amount:
+        example: 100.5
+        type: number
+      operation_type_id:
+        example: 1
+        type: integer
+    required:
+    - account_id
+    - amount
+    - operation_type_id
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: Support
+    url: http://example.com/support
+  description: RESTful API para gerenciamento de contas bancárias
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Account Management API
+  version: "1.0"
+paths:
+  /health:
+    get:
+      consumes:
+      - application/json
+      description: Retorna o status de saúde da API e suas dependências
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: API está operacional
+          schema:
+            $ref: '#/definitions/handler.HealthResponse'
+        "503":
+          description: API indisponível
+          schema:
+            $ref: '#/definitions/handler.ServiceUnavailableError'
+      summary: Verificar saúde da API
+      tags:
+      - Health
+  /v1/accounts:
+    post:
+      consumes:
+      - application/json
+      description: Cria uma nova conta bancária com CPF ou CNPJ
+      parameters:
+      - description: Dados da conta
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.CreateAccountRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Conta criada com sucesso
+          schema:
+            $ref: '#/definitions/domain.Account'
+        "400":
+          description: Erro de validação
+          schema:
+            $ref: '#/definitions/handler.BadRequestError'
+        "500":
+          description: Erro interno do servidor
+          schema:
+            $ref: '#/definitions/handler.InternalServerError'
+      summary: Criar nova conta
+      tags:
+      - Accounts
+  /v1/accounts/{accountId}:
+    get:
+      consumes:
+      - application/json
+      description: Retorna os detalhes de uma conta específica
+      parameters:
+      - description: ID da conta
+        format: int64
+        in: path
+        name: accountId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Conta encontrada
+          schema:
+            $ref: '#/definitions/domain.Account'
+        "400":
+          description: ID inválido
+          schema:
+            $ref: '#/definitions/handler.BadRequestError'
+        "404":
+          description: Conta não encontrada
+          schema:
+            $ref: '#/definitions/handler.NotFoundError'
+        "500":
+          description: Erro interno do servidor
+          schema:
+            $ref: '#/definitions/handler.InternalServerError'
+      summary: Obter conta por ID
+      tags:
+      - Accounts
+  /v1/transactions:
+    post:
+      consumes:
+      - application/json
+      description: Cria uma nova transação bancária (débito/crédito)
+      parameters:
+      - description: Dados da transação
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.createTransactionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Transação criada com sucesso
+          schema:
+            $ref: '#/definitions/domain.Transaction'
+        "400":
+          description: Erro de validação
+          schema:
+            $ref: '#/definitions/handler.BadRequestError'
+        "404":
+          description: Conta não encontrada
+          schema:
+            $ref: '#/definitions/handler.NotFoundError'
+        "500":
+          description: Erro interno do servidor
+          schema:
+            $ref: '#/definitions/handler.InternalServerError'
+      summary: Criar transação
+      tags:
+      - Transactions
+  /v1/transactions/{transactionId}:
+    get:
+      consumes:
+      - application/json
+      description: Retorna os detalhes de uma transação específica
+      parameters:
+      - description: ID da transação
+        format: int64
+        in: path
+        name: transactionId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Transação encontrada
+          schema:
+            $ref: '#/definitions/domain.Transaction'
+        "400":
+          description: ID inválido
+          schema:
+            $ref: '#/definitions/handler.BadRequestError'
+        "404":
+          description: Transação não encontrada
+          schema:
+            $ref: '#/definitions/handler.NotFoundError'
+        "500":
+          description: Erro interno do servidor
+          schema:
+            $ref: '#/definitions/handler.InternalServerError'
+      summary: Obter transação por ID
+      tags:
+      - Transactions
+schemes:
+- http
+swagger: "2.0"

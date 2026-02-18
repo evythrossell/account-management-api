@@ -54,7 +54,7 @@ func TestPostgresAccountRepository(t *testing.T) {
 
 		_, err := repo.Save(ctx, acc)
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "save account")
+		assert.Contains(t, err.Error(), "db error")
 	})
 
 	t.Run("FindByDocument - Success", func(t *testing.T) {
@@ -114,6 +114,6 @@ func TestPostgresAccountRepository(t *testing.T) {
 
 		_, err := repo.FindByAccountID(ctx, 1)
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "infrastructure error")
+		assert.Contains(t, err.Error(), "db error")
 	})
 }
