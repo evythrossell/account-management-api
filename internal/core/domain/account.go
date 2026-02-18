@@ -16,7 +16,7 @@ func NewAccount(docNumber string) (*Account, error) {
 	doc := strings.TrimSpace(docNumber)
 	length := utf8.RuneCountInString(doc)
 
-	if length < 11 || length > 14 {
+	if length != 11 && length != 14 {
 		return nil, common.ErrInvalidDocument
 	}
 

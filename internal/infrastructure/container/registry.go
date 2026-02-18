@@ -2,6 +2,7 @@ package container
 
 import (
 	"database/sql"
+	"errors"
 
 	"github.com/evythrossell/account-management-api/internal/adapter/http/handler"
 	dbadapter "github.com/evythrossell/account-management-api/internal/adapter/storage/postgres"
@@ -27,6 +28,14 @@ type Container struct {
 }
 
 func New(cfg *config.Config, logger logger.Logger) (*Container, error) {
+	if cfg == nil {
+		return nil, errors.New("config cannot be nil")
+	}
+	
+	if logger == nil {
+		return nil, errors.New("logger cannot be nil")
+	}
+	
 	c := &Container{
 		logger: logger,
 	}

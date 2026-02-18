@@ -2,8 +2,9 @@ package pkg
 
 import (
 	"database/sql"
+	"errors"
 
-	"github.com/evythrossell/account-management-api/internal/infrastructure"
+	infrastructure "github.com/evythrossell/account-management-api/internal/infrastructure"
 	"github.com/evythrossell/account-management-api/internal/adapter/http/handler"
 	dbadapter "github.com/evythrossell/account-management-api/internal/adapter/storage/postgres"
 	"github.com/evythrossell/account-management-api/internal/core/port"
@@ -26,7 +27,15 @@ type Container struct {
 	transactionHandler    *handler.TransactionHandler
 }
 
-func New(cfg *config.Config, logger logger.Logger) (*Container, error) {
+func New(cfg *infrastructure.Config, logger logger.Logger) (*Container, error) {
+	if cfg == nil {
+		return nil, errors.New("config cannot be nil")
+	}
+	
+	if logger == nil {
+		return nil, errors.New("logger cannot be nil")
+	}
+	
 	c := &Container{
 		logger: logger,
 	}
@@ -84,8 +93,8 @@ func (c *Container) AccountRepository() port.AccountRepository {
 	return c.accountRepository
 }
 
-func (c *Container) TransactionRepository() port.TransactionService {
-	return c.transactionService
+func (c *Container) TransactionRepository() port.TransactionRepository {
+	return c.transactionRepository
 }
 
 func (c *Container) OperationRepository() port.OperationRepository {
