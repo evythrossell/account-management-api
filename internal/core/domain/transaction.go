@@ -1,31 +1,38 @@
 package domain
 
 import (
-	"errors"
 	"math"
 	"time"
+
+	domainerror "github.com/evythrossell/account-management-api/internal/core/domain/error"
 )
 
 type Transaction struct {
-	TransactionID   int64     `json:"transaction_id"`
-	AccountID       int64     `json:"account_id"`
-	OperationTypeID int16     `json:"operation_type_id"`
-	Amount          float64   `json:"amount"`
-	EventDate       time.Time `json:"-"`
+	ID              int64
+	AccountID       int64
+	OperationTypeID OperationType
+	Amount          float64
+	EventDate       time.Time
 }
 
-func NormalizeAmount(operationTypeID OperationTypeID, amount float64) (float64, error) {
-
-	if amount == 0 {
-		return 0, errors.New("amount cannot be zero")
+func NewTransaction(accountID int64, opType OperationType, amount float64) (*Transaction, error) {
+	if amount <= 0 {
+		return nil, domainerror.ErrInvalidAmount
 	}
 
-	if operationTypeID.IsDebt() {
-		return -math.Abs(amount), nil
-	}
-	if operationTypeID.IsCredit() {
-		return math.Abs(amount), nil
+	if !opType.IsValid() {
+		return nil, domainerror.ErrInvalidOperation
 	}
 
-	return 0, errors.New("invalid operation type")
+	normalizedAmount := math.Abs(amount)
+	if opType.IsDebt() {
+		normalizedAmount = -normalizedAmount
+	}
+
+	return &Transaction{
+		AccountID:       accountID,
+		OperationTypeID: opType,
+		Amount:          normalizedAmount,
+		EventDate:       time.Now(),
+	}, nil
 }

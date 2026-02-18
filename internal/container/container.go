@@ -4,9 +4,9 @@ import (
 	"database/sql"
 
 	"github.com/evythrossell/account-management-api/config"
-	dbadapter "github.com/evythrossell/account-management-api/internal/adapters/db"
 	httpadapter "github.com/evythrossell/account-management-api/internal/adapters/http"
 	logger "github.com/evythrossell/account-management-api/internal/adapters/logger"
+	dbadapter "github.com/evythrossell/account-management-api/internal/adapters/repository"
 	"github.com/evythrossell/account-management-api/internal/core/ports"
 	services "github.com/evythrossell/account-management-api/internal/core/services"
 	_ "github.com/lib/pq"
@@ -20,6 +20,7 @@ type Container struct {
 	operationRepository   ports.OperationRepository
 	accountService        ports.AccountService
 	transactionService    ports.TransactionService
+	healthService         ports.HealthService
 	accountHandler        *httpadapter.AccountHandler
 	healthHandler         *httpadapter.HealthHandler
 	transactionHandler    *httpadapter.TransactionHandler
@@ -42,21 +43,24 @@ func New(cfg *config.Config, logger logger.Logger) (*Container, error) {
 	c.db = db
 	c.logger.Info("database initialized")
 
-	c.accountRepository = dbadapter.NewAccountRepository(db)
-	c.transactionRepository = dbadapter.NewTransactionRepository(db)
-	c.operationRepository = dbadapter.NewOperationRepository(db)
+	c.accountRepository = dbadapter.NewPostgresAccountRepository(db)
+	c.transactionRepository = dbadapter.NewPostgresTransactionRepository(db)
+	c.operationRepository = dbadapter.NewPostgresOperationRepository(db)
 	c.logger.Info("repositories initialized")
 
 	c.accountService = services.NewAccountService(c.accountRepository)
-	c.transactionService = services.NewTransactionService(db, c.accountRepository, c.transactionRepository, c.operationRepository)
+	c.transactionService = services.NewTransactionService(
+		c.accountRepository,
+		c.transactionRepository,
+		c.operationRepository,
+	)
+	c.healthService = services.NewHealthService(c.DB())
 	c.logger.Info("services initialized")
 
 	c.accountHandler = httpadapter.NewAccountHandler(c.accountService)
 	c.transactionHandler = httpadapter.NewTransactionHandler(c.transactionService)
+	c.healthHandler = httpadapter.NewHealthHandler(c.healthService)
 	c.logger.Info("handlers initialized")
-
-	c.healthHandler = httpadapter.NewHealthHandler(c.db)
-	c.logger.Info("health handler initialized")
 
 	return c, nil
 }
@@ -86,6 +90,10 @@ func (c *Container) TransactionRepository() ports.TransactionService {
 
 func (c *Container) OperationRepository() ports.OperationRepository {
 	return c.operationRepository
+}
+
+func (c *Container) HealthService() ports.HealthService {
+	return c.healthService
 }
 
 func (c *Container) AccountService() ports.AccountService {

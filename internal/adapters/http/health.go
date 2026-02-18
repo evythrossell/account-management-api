@@ -1,35 +1,30 @@
 package http
 
 import (
-    "context"
-    "database/sql"
-    "net/http"
-    "time"
+	"net/http"
 
-    "github.com/gin-gonic/gin"
+	"github.com/evythrossell/account-management-api/internal/core/ports"
+	"github.com/gin-gonic/gin"
 )
 
 type HealthHandler struct {
-    db *sql.DB
+	service ports.HealthService
 }
 
-func NewHealthHandler(db *sql.DB) *HealthHandler {
-    return &HealthHandler{db: db}
+func NewHealthHandler(service ports.HealthService) *HealthHandler {
+	return &HealthHandler{
+		service: service,
+	}
 }
 
 func (h *HealthHandler) Check(c *gin.Context) {
-    ctx, cancel := context.WithTimeout(c.Request.Context(), 2*time.Second)
-    defer cancel()
+	if err := h.service.Check(c.Request.Context()); err != nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{
+			"status": "unavailable",
+			"detail": err.Error(),
+		})
+		return
+	}
 
-    if h.db != nil {
-        if err := h.db.PingContext(ctx); err != nil {
-            c.JSON(http.StatusServiceUnavailable, gin.H{
-                "status": "unavailable",
-                "detail": err.Error(),
-            })
-            return
-        }
-    }
-
-    c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	c.JSON(http.StatusOK, gin.H{"status": "ok"})
 }

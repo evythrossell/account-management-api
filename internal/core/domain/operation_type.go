@@ -1,25 +1,32 @@
 package domain
 
-type OperationTypeID int16
+type OperationType int16
 
 const (
-	OperationTypePurchase OperationTypeID = 1
-	OperationTypeInstallmentPurchase OperationTypeID = 2
-	OperationTypeWithdrawal OperationTypeID = 3
-	OperationTypePayment OperationTypeID = 4
+	Purchase            OperationType = 1
+	InstallmentPurchase OperationType = 2
+	Withdrawal          OperationType = 3
+	Payment             OperationType = 4
 )
 
-func (op OperationTypeID) IsDebt() bool {
+func (op OperationType) IsDebt() bool {
 	switch op {
-		case OperationTypePurchase,
-			 OperationTypeInstallmentPurchase,
-			 OperationTypeWithdrawal:
-				return true
-		default:
-			return false
+	case Purchase, InstallmentPurchase, Withdrawal:
+		return true
+	default:
+		return false
 	}
 }
 
-func (op OperationTypeID) IsCredit() bool {
-	return op == OperationTypePayment
+func (op OperationType) IsCredit() bool {
+	return op == Payment
+}
+
+func (op OperationType) IsValid() bool {
+	switch op {
+	case Purchase, InstallmentPurchase, Withdrawal, Payment:
+		return true
+	default:
+		return false
+	}
 }
