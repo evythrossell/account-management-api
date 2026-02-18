@@ -34,6 +34,7 @@ func (p *PostgresAccountRepository) Save(ctx context.Context, account *domain.Ac
 		}
 		return nil, err
 	}
+	account.ID = accountId
 	return account, nil
 }
 
