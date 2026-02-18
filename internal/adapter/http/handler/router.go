@@ -1,7 +1,7 @@
-package http
+package handler
 
 import (
-	"github.com/evythrossell/account-management-api/internal/adapters/http/middleware"
+	"github.com/evythrossell/account-management-api/internal/adapter/http/middleware"
 	"github.com/gin-gonic/gin"
 )
 

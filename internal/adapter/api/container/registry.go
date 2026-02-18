@@ -4,9 +4,9 @@ import (
 	"database/sql"
 
 	"github.com/evythrossell/account-management-api/config"
-	httpadapter "github.com/evythrossell/account-management-api/internal/adapters/http"
-	logger "github.com/evythrossell/account-management-api/internal/adapters/logger"
-	dbadapter "github.com/evythrossell/account-management-api/internal/adapters/repository"
+	httpadapter "github.com/evythrossell/account-management-api/internal/adapter/http/handler"
+	logger "github.com/evythrossell/account-management-api/internal/adapter/logger"
+	dbadapter "github.com/evythrossell/account-management-api/internal/adapter/repository"
 	"github.com/evythrossell/account-management-api/internal/core/ports"
 	services "github.com/evythrossell/account-management-api/internal/core/services"
 	_ "github.com/lib/pq"
