@@ -1,10 +1,10 @@
-package http
+package handler
 
 import (
 	"net/http"
 	"strconv"
 
-	"github.com/evythrossell/account-management-api/internal/core/ports"
+	"github.com/evythrossell/account-management-api/internal/core/port"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,10 +15,10 @@ type createTransactionRequest struct {
 }
 
 type TransactionHandler struct {
-	service ports.TransactionService
+	service port.TransactionService
 }
 
-func NewTransactionHandler(service ports.TransactionService) *TransactionHandler {
+func NewTransactionHandler(service port.TransactionService) *TransactionHandler {
 	return &TransactionHandler{
 		service: service,
 	}

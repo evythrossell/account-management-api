@@ -3,14 +3,14 @@ package services
 import (
 	"context"
 
-	"github.com/evythrossell/account-management-api/internal/core/ports"
+	"github.com/evythrossell/account-management-api/internal/core/port"
 )
 
 type healthService struct {
-	checker ports.DBHealthChecker
+	checker port.DBHealthChecker
 }
 
-func NewHealthService(checker ports.DBHealthChecker) ports.HealthService {
+func NewHealthService(checker port.DBHealthChecker) port.HealthService {
 	return &healthService{checker: checker}
 }
 

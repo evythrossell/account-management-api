@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/evythrossell/account-management-api/config"
-	httpadapter "github.com/evythrossell/account-management-api/internal/adapters/http"
-	"github.com/evythrossell/account-management-api/internal/adapters/logger"
-	"github.com/evythrossell/account-management-api/internal/container"
+	"github.com/evythrossell/account-management-api/internal/adapter/api/container"
+	"github.com/evythrossell/account-management-api/internal/adapter/http/handler"
+	"github.com/evythrossell/account-management-api/internal/adapter/logger"
 )
 
 func main() {
@@ -27,7 +27,7 @@ func main() {
 	}
 	defer ctr.Close()
 
-	router := httpadapter.SetupRouter(
+	router := handler.SetupRouter(
 		ctr.AccountHandler(),
 		ctr.HealthHandler(),
 		ctr.TransactionHandler(),
