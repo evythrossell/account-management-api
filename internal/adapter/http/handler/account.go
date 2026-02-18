@@ -21,13 +21,13 @@ func NewAccountHandler(service port.AccountService) *AccountHandler {
 }
 
 type CreateAccountRequest struct {
-	DocumentNumber string `json:"document_number"`
+	DocumentNumber string `json:"document_number" binding:"required"`
 }
 
 func (h *AccountHandler) CreateAccount(c *gin.Context) {
 	var req CreateAccountRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"code": "INVALID_JSON", "message": "payload error"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"code": "INVALID_BODY", "message": "invalid request body or missing required fields"})
 		return
 	}
 
