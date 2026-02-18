@@ -5,10 +5,10 @@ import (
 
 	"github.com/evythrossell/account-management-api/config"
 	"github.com/evythrossell/account-management-api/internal/adapter/http/handler"
-	"github.com/evythrossell/account-management-api/internal/adapter/logger"
 	dbadapter "github.com/evythrossell/account-management-api/internal/adapter/repository"
 	"github.com/evythrossell/account-management-api/internal/core/port"
 	service "github.com/evythrossell/account-management-api/internal/core/service"
+	"github.com/evythrossell/account-management-api/pkg"
 	_ "github.com/lib/pq"
 )
 
