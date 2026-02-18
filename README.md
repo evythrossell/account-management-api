@@ -59,7 +59,16 @@ $git clone [https://github.com/evythrossell/account-management-api.git$](https:/
 $ go mod tidy
 
 # 3. Spin up the infrastructure (Database + App)
-$ docker compose up -d
+$ docker compose up
+
+# Stop services while keeping your data volumes intact and remove containers and their associated networks, defined in a docker-compose.yaml file
+$ docker compose down
+
+# Build Docker images defined in docker-compose
+$ docker compose build
+
+# Lists all Docker images available locally on your system
+$ docker images
 
 ```
 
