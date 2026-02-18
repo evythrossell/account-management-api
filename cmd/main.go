@@ -9,9 +9,9 @@ import (
 	"time"
 
 	"github.com/evythrossell/account-management-api/config"
+	"github.com/evythrossell/account-management-api/internal/adapters/api/container"
 	httpadapter "github.com/evythrossell/account-management-api/internal/adapters/http"
 	"github.com/evythrossell/account-management-api/internal/adapters/logger"
-	"github.com/evythrossell/account-management-api/internal/container"
 )
 
 func main() {
