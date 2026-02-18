@@ -20,12 +20,15 @@ func NewAccountService(repo port.AccountRepository) port.AccountService {
 func (service *accountService) CreateAccount(ctx context.Context, docNumber string) (*domain.Account, error) {
 	acc, err := domain.NewAccount(docNumber)
 	if err != nil {
-		return nil, common.NewValidationError("document must be between 11 and 14 digits", err)
+		return nil, common.NewValidationError(domain.ErrMsgDocumentInvalid, err)
 	}
 
 	savedAcc, err := service.repo.Save(ctx, acc)
 	if err != nil {
-		return nil, common.NewInternalError("failed to save account", err)
+		if errors.Is(err, common.ErrAccountAlreadyExists) {
+			return nil, common.NewConflictError(domain.ErrMsgAccountExists, err)
+		}
+		return nil, common.NewInternalError(domain.ErrMsgSaveAccountFailed, err)
 	}
 
 	return savedAcc, nil
@@ -44,9 +47,9 @@ func (s *accountService) GetAccountByID(ctx context.Context, id int64) (*domain.
 	acc, err := s.repo.FindByAccountID(ctx, id)
 	if err != nil {
 		if errors.Is(err, common.ErrAccountNotFound) {
-			return nil, common.NewNotFoundError("account not found", err)
+			return nil, common.NewNotFoundError(domain.ErrMsgAccountNotFound, err)
 		}
-		return nil, common.NewInternalError("database error", err)
+		return nil, common.NewInternalError(domain.ErrMsgDatabaseError, err)
 	}
 	return acc, nil
 }
