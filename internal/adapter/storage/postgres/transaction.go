@@ -6,8 +6,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/evythrossell/account-management-api/internal/core/common"
 	"github.com/evythrossell/account-management-api/internal/core/domain"
+	common "github.com/evythrossell/account-management-api/pkg"
 	"github.com/lib/pq"
 )
 

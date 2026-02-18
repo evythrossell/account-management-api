@@ -3,7 +3,7 @@ package domain
 import (
 	"strings"
 
-	"github.com/evythrossell/account-management-api/internal/core/common"
+	common "github.com/evythrossell/account-management-api/pkg"
 )
 
 type Account struct {
