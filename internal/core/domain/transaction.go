@@ -4,7 +4,7 @@ import (
 	"math"
 	"time"
 
-	common "github.com/evythrossell/account-management-api/internal/core/common"
+	"github.com/evythrossell/account-management-api/internal/core/common"
 )
 
 type Transaction struct {

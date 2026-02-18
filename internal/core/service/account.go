@@ -4,16 +4,16 @@ import (
 	"context"
 	"errors"
 
-	common "github.com/evythrossell/account-management-api/internal/core/common"
+	"github.com/evythrossell/account-management-api/internal/core/common"
 	"github.com/evythrossell/account-management-api/internal/core/domain"
-	"github.com/evythrossell/account-management-api/internal/core/ports"
+	"github.com/evythrossell/account-management-api/internal/core/port"
 )
 
 type accountService struct {
-	repo ports.AccountRepository
+	repo port.AccountRepository
 }
 
-func NewAccountService(repo ports.AccountRepository) ports.AccountService {
+func NewAccountService(repo port.AccountRepository) port.AccountService {
 	return &accountService{repo: repo}
 }
 

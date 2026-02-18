@@ -4,26 +4,26 @@ import (
 	"database/sql"
 
 	"github.com/evythrossell/account-management-api/config"
-	httpadapter "github.com/evythrossell/account-management-api/internal/adapter/http/handler"
-	logger "github.com/evythrossell/account-management-api/internal/adapter/logger"
+	"github.com/evythrossell/account-management-api/internal/adapter/http/handler"
+	"github.com/evythrossell/account-management-api/internal/adapter/logger"
 	dbadapter "github.com/evythrossell/account-management-api/internal/adapter/repository"
-	"github.com/evythrossell/account-management-api/internal/core/ports"
-	services "github.com/evythrossell/account-management-api/internal/core/services"
+	"github.com/evythrossell/account-management-api/internal/core/port"
+	service "github.com/evythrossell/account-management-api/internal/core/service"
 	_ "github.com/lib/pq"
 )
 
 type Container struct {
 	logger                logger.Logger
 	db                    *sql.DB
-	accountRepository     ports.AccountRepository
-	transactionRepository ports.TransactionRepository
-	operationRepository   ports.OperationRepository
-	accountService        ports.AccountService
-	transactionService    ports.TransactionService
-	healthService         ports.HealthService
-	accountHandler        *httpadapter.AccountHandler
-	healthHandler         *httpadapter.HealthHandler
-	transactionHandler    *httpadapter.TransactionHandler
+	accountRepository     port.AccountRepository
+	transactionRepository port.TransactionRepository
+	operationRepository   port.OperationRepository
+	accountService        port.AccountService
+	transactionService    port.TransactionService
+	healthService         port.HealthService
+	accountHandler        *handler.AccountHandler
+	healthHandler         *handler.HealthHandler
+	transactionHandler    *handler.TransactionHandler
 }
 
 func New(cfg *config.Config, logger logger.Logger) (*Container, error) {
@@ -48,18 +48,18 @@ func New(cfg *config.Config, logger logger.Logger) (*Container, error) {
 	c.operationRepository = dbadapter.NewPostgresOperationRepository(db)
 	c.logger.Info("repositories initialized")
 
-	c.accountService = services.NewAccountService(c.accountRepository)
-	c.transactionService = services.NewTransactionService(
+	c.accountService = service.NewAccountService(c.accountRepository)
+	c.transactionService = service.NewTransactionService(
 		c.accountRepository,
 		c.transactionRepository,
 		c.operationRepository,
 	)
-	c.healthService = services.NewHealthService(c.DB())
+	c.healthService = service.NewHealthService(c.DB())
 	c.logger.Info("services initialized")
 
-	c.accountHandler = httpadapter.NewAccountHandler(c.accountService)
-	c.transactionHandler = httpadapter.NewTransactionHandler(c.transactionService)
-	c.healthHandler = httpadapter.NewHealthHandler(c.healthService)
+	c.accountHandler = handler.NewAccountHandler(c.accountService)
+	c.transactionHandler = handler.NewTransactionHandler(c.transactionService)
+	c.healthHandler = handler.NewHealthHandler(c.healthService)
 	c.logger.Info("handlers initialized")
 
 	return c, nil
@@ -80,38 +80,38 @@ func (c *Container) DB() *sql.DB {
 	return c.db
 }
 
-func (c *Container) AccountRepository() ports.AccountRepository {
+func (c *Container) AccountRepository() port.AccountRepository {
 	return c.accountRepository
 }
 
-func (c *Container) TransactionRepository() ports.TransactionService {
+func (c *Container) TransactionRepository() port.TransactionService {
 	return c.transactionService
 }
 
-func (c *Container) OperationRepository() ports.OperationRepository {
+func (c *Container) OperationRepository() port.OperationRepository {
 	return c.operationRepository
 }
 
-func (c *Container) HealthService() ports.HealthService {
+func (c *Container) HealthService() port.HealthService {
 	return c.healthService
 }
 
-func (c *Container) AccountService() ports.AccountService {
+func (c *Container) AccountService() port.AccountService {
 	return c.accountService
 }
 
-func (c *Container) TransactionService() ports.TransactionService {
+func (c *Container) TransactionService() port.TransactionService {
 	return c.transactionService
 }
 
-func (c *Container) AccountHandler() *httpadapter.AccountHandler {
+func (c *Container) AccountHandler() *handler.AccountHandler {
 	return c.accountHandler
 }
 
-func (c *Container) HealthHandler() *httpadapter.HealthHandler {
+func (c *Container) HealthHandler() *handler.HealthHandler {
 	return c.healthHandler
 }
 
-func (c *Container) TransactionHandler() *httpadapter.TransactionHandler {
+func (c *Container) TransactionHandler() *handler.TransactionHandler {
 	return c.transactionHandler
 }

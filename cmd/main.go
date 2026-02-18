@@ -10,7 +10,7 @@ import (
 
 	"github.com/evythrossell/account-management-api/config"
 	"github.com/evythrossell/account-management-api/internal/adapter/api/container"
-	handler "github.com/evythrossell/account-management-api/internal/adapter/http/handler"
+	"github.com/evythrossell/account-management-api/internal/adapter/http/handler"
 	"github.com/evythrossell/account-management-api/internal/adapter/logger"
 )
 

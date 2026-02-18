@@ -4,15 +4,15 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/evythrossell/account-management-api/internal/core/ports"
+	"github.com/evythrossell/account-management-api/internal/core/port"
 	"github.com/gin-gonic/gin"
 )
 
 type AccountHandler struct {
-	service ports.AccountService
+	service port.AccountService
 }
 
-func NewAccountHandler(service ports.AccountService) *AccountHandler {
+func NewAccountHandler(service port.AccountService) *AccountHandler {
 	return &AccountHandler{
 		service: service,
 	}
