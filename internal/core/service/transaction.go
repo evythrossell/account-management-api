@@ -35,21 +35,30 @@ func (service *transactionService) CreateTransaction(
 ) (*domain.Transaction, error) {
 	_, err := service.accRepo.FindByAccountID(ctx, accountID)
 	if err != nil {
-		return nil, err
+		if errors.Is(err, common.ErrAccountNotFound) {
+			return nil, common.NewValidationError("account id does not exist", err)
+		}
+		return nil, common.NewInternalError("database error", err)
 	}
 
 	opType := domain.OperationType(operationTypeID)
 	exists, err := service.opRepo.Exists(ctx, int16(opType))
 	if err != nil {
-		return nil, err
+		return nil, common.NewInternalError("database error", err)
 	}
 	if !exists {
-		return nil, common.ErrInvalidOperation
+		return nil, common.NewValidationError("invalid operation type", common.ErrInvalidOperation)
 	}
 
 	tx, err := domain.NewTransaction(accountID, opType, amount)
 	if err != nil {
-		return nil, err
+		if errors.Is(err, common.ErrInvalidAmount) {
+			return nil, common.NewValidationError("amount must be greater than zero", err)
+		}
+		if errors.Is(err, common.ErrInvalidOperation) {
+			return nil, common.NewValidationError("invalid operation type", err)
+		}
+		return nil, common.NewInternalError("failed to create transaction", err)
 	}
 
 	return service.txRepo.Save(ctx, tx)

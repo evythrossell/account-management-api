@@ -37,6 +37,20 @@ func Error() gin.HandlerFunc {
 				})
 				return
 			}
+			if errors.Is(err, common.ErrInvalidAmount) {
+				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+					"code":    "VALIDATION_ERROR",
+					"message": "amount must be greater than zero",
+				})
+				return
+			}
+			if errors.Is(err, common.ErrInvalidOperation) {
+				c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+					"code":    "VALIDATION_ERROR",
+					"message": "invalid operation type",
+				})
+				return
+			}
 
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"code":    "INTERNAL_SERVER_ERROR",
