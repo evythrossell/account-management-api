@@ -3,22 +3,22 @@ package services
 import (
 	"context"
 
-	common "github.com/evythrossell/account-management-api/internal/core/common"
+	"github.com/evythrossell/account-management-api/internal/core/common"
 	"github.com/evythrossell/account-management-api/internal/core/domain"
-	"github.com/evythrossell/account-management-api/internal/core/ports"
+	"github.com/evythrossell/account-management-api/internal/core/port"
 )
 
 type transactionService struct {
-	accRepo ports.AccountRepository
-	txRepo  ports.TransactionRepository
-	opRepo  ports.OperationRepository
+	accRepo port.AccountRepository
+	txRepo  port.TransactionRepository
+	opRepo  port.OperationRepository
 }
 
 func NewTransactionService(
-	ar ports.AccountRepository,
-	tr ports.TransactionRepository,
-	or ports.OperationRepository,
-) ports.TransactionService {
+	ar port.AccountRepository,
+	tr port.TransactionRepository,
+	or port.OperationRepository,
+) port.TransactionService {
 	return &transactionService{
 		accRepo: ar,
 		txRepo:  tr,

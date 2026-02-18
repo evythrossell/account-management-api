@@ -1,17 +1,17 @@
-package http
+package handler
 
 import (
 	"net/http"
 
-	"github.com/evythrossell/account-management-api/internal/core/ports"
+	"github.com/evythrossell/account-management-api/internal/core/port"
 	"github.com/gin-gonic/gin"
 )
 
 type HealthHandler struct {
-	service ports.HealthService
+	service port.HealthService
 }
 
-func NewHealthHandler(service ports.HealthService) *HealthHandler {
+func NewHealthHandler(service port.HealthService) *HealthHandler {
 	return &HealthHandler{
 		service: service,
 	}

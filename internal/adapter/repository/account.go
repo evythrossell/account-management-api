@@ -6,8 +6,8 @@ import (
 	"errors"
 	"fmt"
 
-	common "github.com/evythrossell/account-management-api/internal/core/common"
-	domain "github.com/evythrossell/account-management-api/internal/core/domain"
+	"github.com/evythrossell/account-management-api/internal/core/common"
+	"github.com/evythrossell/account-management-api/internal/core/domain"
 	"github.com/lib/pq"
 )
 

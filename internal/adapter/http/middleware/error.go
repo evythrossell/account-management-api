@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	common "github.com/evythrossell/account-management-api/internal/core/common"
+	"github.com/evythrossell/account-management-api/internal/core/common"
 	"github.com/gin-gonic/gin"
 )
 
