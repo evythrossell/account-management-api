@@ -8,9 +8,9 @@ import (
 	"syscall"
 	"time"
 
-	container "github.com/evythrossell/account-management-api/internal/adapter/di"
 	"github.com/evythrossell/account-management-api/internal/adapter/http/handler"
 	config "github.com/evythrossell/account-management-api/internal/infrastructure"
+	"github.com/evythrossell/account-management-api/internal/infrastructure/container"
 	logger "github.com/evythrossell/account-management-api/pkg"
 )
 
