@@ -3,24 +3,24 @@ package db
 import (
 	"context"
 	"database/sql"
-
-	domainerror "github.com/evythrossell/account-management-api/internal/core/error"
+	"fmt"
 )
 
-type operationRepository struct {
+type PostgresOperationRepository struct {
 	db *sql.DB
 }
 
-func NewOperationRepository(db *sql.DB) *operationRepository {
-	return &operationRepository{db: db}
+func NewPostgresOperationRepository(db *sql.DB) *PostgresOperationRepository {
+	return &PostgresOperationRepository{db: db}
 }
 
-func (r *operationRepository) Exists(ctx context.Context, operationType int16) (bool, error) {
+func (p *PostgresOperationRepository) Exists(ctx context.Context, operationType int16) (bool, error) {
 	var exists bool
-	err := r.db.QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM operations_types WHERE operation_type_id=$1)", operationType).
-		Scan(&exists)
+	query := `SELECT EXISTS(SELECT 1 FROM operations_types WHERE operation_type_id = $1)`
+
+	err := p.db.QueryRowContext(ctx, query, operationType).Scan(&exists)
 	if err != nil {
-		return false, domainerror.NewConflictError("check operation exists", err)
+		return false, fmt.Errorf("infrastructure error: failed to check operation existence: %w", err)
 	}
 
 	return exists, nil
