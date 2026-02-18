@@ -30,6 +30,13 @@ func Error() gin.HandlerFunc {
 				})
 				return
 			}
+			if errors.Is(err, common.ErrTransactionNotFound) {
+				c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+					"code":    "NOT_FOUND_ERROR",
+					"message": "transaction not found",
+				})
+				return
+			}
 
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"code":    "INTERNAL_SERVER_ERROR",

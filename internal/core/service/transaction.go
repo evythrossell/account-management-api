@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 
 	"github.com/evythrossell/account-management-api/internal/core/domain"
 	"github.com/evythrossell/account-management-api/internal/core/port"
@@ -57,7 +58,10 @@ func (service *transactionService) CreateTransaction(
 func (service *transactionService) GetByTransactionID(ctx context.Context, transactionID int64) (*domain.Transaction, error) {
 	tx, err := service.txRepo.FindByTransactionID(ctx, transactionID)
 	if err != nil {
-		return nil, err
+		if errors.Is(err, common.ErrTransactionNotFound) {
+			return nil, common.NewNotFoundError("transaction not found", err)
+		}
+		return nil, common.NewInternalError("database error", err)
 	}
 
 	return tx, nil
