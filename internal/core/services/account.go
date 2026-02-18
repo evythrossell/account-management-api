@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
+	common "github.com/evythrossell/account-management-api/internal/core/common"
 	"github.com/evythrossell/account-management-api/internal/core/domain"
-	domainerror "github.com/evythrossell/account-management-api/internal/core/domain/error"
 	"github.com/evythrossell/account-management-api/internal/core/ports"
 )
 
@@ -25,10 +25,10 @@ func (service *accountService) CreateAccount(ctx context.Context, documentNumber
 
 	_, err = service.repo.FindByDocument(ctx, documentNumber)
 	if err == nil {
-		return nil, domainerror.ErrAccountAlreadyExists
+		return nil, common.ErrAccountAlreadyExists
 	}
 
-	if !errors.Is(err, domainerror.ErrAccountNotFound) {
+	if !errors.Is(err, common.ErrAccountNotFound) {
 		return nil, err
 	}
 

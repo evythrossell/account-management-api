@@ -3,7 +3,7 @@ package domain
 import (
 	"strings"
 
-	domainerror "github.com/evythrossell/account-management-api/internal/core/domain/error"
+	common "github.com/evythrossell/account-management-api/internal/core/common"
 )
 
 type Account struct {
@@ -15,7 +15,7 @@ func NewAccount(documentNumber string) (*Account, error) {
 	doc := strings.TrimSpace(documentNumber)
 
 	if !isValidDocument(doc) {
-		return nil, domainerror.ErrInvalidDocument
+		return nil, common.ErrInvalidDocument
 	}
 
 	return &Account{

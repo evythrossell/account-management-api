@@ -6,8 +6,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/evythrossell/account-management-api/internal/core/domain"
-	domainerror "github.com/evythrossell/account-management-api/internal/core/domain/error"
+	common "github.com/evythrossell/account-management-api/internal/core/common"
+	domain "github.com/evythrossell/account-management-api/internal/core/domain"
 	"github.com/lib/pq"
 )
 
@@ -34,7 +34,7 @@ func (p *PostgresTransactionRepository) Save(ctx context.Context, transaction *d
 		var pgErr *pq.Error
 		if errors.As(err, &pgErr) {
 			if pgErr.Code == "23503" {
-				return nil, fmt.Errorf("%w: %v", domainerror.ErrAccountNotFound, err)
+				return nil, fmt.Errorf("%w: %v", common.ErrAccountNotFound, err)
 			}
 		}
 		return nil, fmt.Errorf("infrastructure error: failed to save transaction: %w", err)
@@ -55,7 +55,7 @@ func (p *PostgresTransactionRepository) FindByTransactionID(ctx context.Context,
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, domainerror.ErrTransactionNotFound
+			return nil, common.ErrTransactionNotFound
 		}
 		return nil, fmt.Errorf("infrastructure error: failed to find transaction: %w", err)
 	}

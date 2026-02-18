@@ -6,8 +6,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/evythrossell/account-management-api/internal/core/domain"
-	domainerror "github.com/evythrossell/account-management-api/internal/core/domain/error"
+	common "github.com/evythrossell/account-management-api/internal/core/common"
+	domain "github.com/evythrossell/account-management-api/internal/core/domain"
 	"github.com/lib/pq"
 )
 
@@ -27,7 +27,7 @@ func (p *PostgresAccountRepository) Save(ctx context.Context, account *domain.Ac
 		var pgErr *pq.Error
 		if errors.As(err, &pgErr) {
 			if pgErr.Code == "23505" {
-				return nil, fmt.Errorf("%w: %v", domainerror.ErrAccountAlreadyExists, err)
+				return nil, fmt.Errorf("%w: %v", common.ErrAccountAlreadyExists, err)
 			}
 		}
 		return nil, fmt.Errorf("save account: %w", err)
@@ -43,7 +43,7 @@ func (p *PostgresAccountRepository) FindByDocument(ctx context.Context, document
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, domainerror.ErrAccountNotFound
+			return nil, common.ErrAccountNotFound
 		}
 		return nil, fmt.Errorf("infrastructure error: find account by document: %w", err)
 	}
@@ -59,7 +59,7 @@ func (p *PostgresAccountRepository) FindByAccountID(ctx context.Context, account
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, domainerror.ErrAccountNotFound
+			return nil, common.ErrAccountNotFound
 		}
 		return nil, fmt.Errorf("infrastructure error: find account by id: %w", err)
 	}
