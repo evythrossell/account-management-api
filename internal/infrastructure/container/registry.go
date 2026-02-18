@@ -31,11 +31,11 @@ func New(cfg *config.Config, logger logger.Logger) (*Container, error) {
 	if cfg == nil {
 		return nil, errors.New("config cannot be nil")
 	}
-	
+
 	if logger == nil {
 		return nil, errors.New("logger cannot be nil")
 	}
-	
+
 	c := &Container{
 		logger: logger,
 	}

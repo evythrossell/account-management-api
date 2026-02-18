@@ -4,11 +4,11 @@ import (
 	"database/sql"
 	"errors"
 
-	infrastructure "github.com/evythrossell/account-management-api/internal/infrastructure"
 	"github.com/evythrossell/account-management-api/internal/adapter/http/handler"
 	dbadapter "github.com/evythrossell/account-management-api/internal/adapter/storage/postgres"
 	"github.com/evythrossell/account-management-api/internal/core/port"
 	service "github.com/evythrossell/account-management-api/internal/core/service"
+	infrastructure "github.com/evythrossell/account-management-api/internal/infrastructure"
 	logger "github.com/evythrossell/account-management-api/pkg"
 	_ "github.com/lib/pq"
 )
@@ -31,11 +31,11 @@ func New(cfg *infrastructure.Config, logger logger.Logger) (*Container, error) {
 	if cfg == nil {
 		return nil, errors.New("config cannot be nil")
 	}
-	
+
 	if logger == nil {
 		return nil, errors.New("logger cannot be nil")
 	}
-	
+
 	c := &Container{
 		logger: logger,
 	}

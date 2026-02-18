@@ -108,7 +108,7 @@ func TestAPIContainerClose(t *testing.T) {
 
 func TestAPIContainerGetters(t *testing.T) {
 	c := &adapter.Container{}
-	
+
 	assert.Nil(t, c.Logger())
 	assert.Nil(t, c.DB())
 	assert.Nil(t, c.AccountRepository())
