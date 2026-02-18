@@ -18,18 +18,16 @@ func Error() gin.HandlerFunc {
 			var de *common.DomainError
 
 			if errors.As(err, &de) {
-				c.JSON(de.HTTPStatusCode(), gin.H{
+				c.AbortWithStatusJSON(de.HTTPStatusCode(), gin.H{
 					"code":    de.Code,
 					"message": de.PublicMessage(),
 				})
 			} else {
-				c.JSON(http.StatusInternalServerError, gin.H{
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 					"code":    "INTERNAL_SERVER_ERROR",
 					"message": "an unexpected error occurred",
 				})
 			}
-
-			c.Abort()
 		}
 	}
 }

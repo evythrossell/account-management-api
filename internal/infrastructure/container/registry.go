@@ -84,8 +84,8 @@ func (c *Container) AccountRepository() port.AccountRepository {
 	return c.accountRepository
 }
 
-func (c *Container) TransactionRepository() port.TransactionService {
-	return c.transactionService
+func (c *Container) TransactionRepository() port.TransactionRepository {
+	return c.transactionRepository
 }
 
 func (c *Container) OperationRepository() port.OperationRepository {
