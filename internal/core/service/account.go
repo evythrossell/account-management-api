@@ -25,6 +25,9 @@ func (service *accountService) CreateAccount(ctx context.Context, docNumber stri
 
 	savedAcc, err := service.repo.Save(ctx, acc)
 	if err != nil {
+		if errors.Is(err, common.ErrAccountAlreadyExists) {
+			return nil, common.NewConflictError("account with this document already exists", err)
+		}
 		return nil, common.NewInternalError("failed to save account", err)
 	}
 
