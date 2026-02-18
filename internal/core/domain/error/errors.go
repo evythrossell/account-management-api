@@ -6,6 +6,11 @@ import (
 	"net/http"
 )
 
+var (
+	ErrAccountNotFound = errors.New("account not found")
+	ErrInvalidDocument = errors.New("invalid document format")
+)
+
 type DomainError struct {
 	Code    string
 	Message string
