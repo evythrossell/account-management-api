@@ -8,10 +8,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/evythrossell/account-management-api/config"
-	"github.com/evythrossell/account-management-api/internal/adapter/api/container"
+	container "github.com/evythrossell/account-management-api/internal/adapter/di"
 	"github.com/evythrossell/account-management-api/internal/adapter/http/handler"
-	"github.com/evythrossell/account-management-api/pkg"
+	config "github.com/evythrossell/account-management-api/internal/infrastructure"
+	logger "github.com/evythrossell/account-management-api/pkg"
 )
 
 func main() {
