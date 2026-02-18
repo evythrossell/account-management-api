@@ -4,8 +4,11 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/evythrossell/account-management-api/internal/core/domain"
 	"github.com/evythrossell/account-management-api/internal/core/port"
 	"github.com/gin-gonic/gin"
+
+	common "github.com/evythrossell/account-management-api/pkg"
 )
 
 type AccountHandler struct {
@@ -25,7 +28,7 @@ type CreateAccountRequest struct {
 func (h *AccountHandler) CreateAccount(c *gin.Context) {
 	var req CreateAccountRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"code": "INVALID_BODY", "message": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"code": domain.ErrCodeInvalidBody, "message": domain.ErrMsgInvalidBodyRequest})
 		return
 	}
 
@@ -39,13 +42,14 @@ func (h *AccountHandler) CreateAccount(c *gin.Context) {
 }
 
 func (h *AccountHandler) GetAccount(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("accountId"))
+	idParam := c.Param("accountId")
+	id, err := strconv.ParseInt(idParam, 10, 64)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"code": "INVALID_ID", "message": "the account ID must be an integer"})
+		c.Error(common.NewValidationError(domain.ErrMsgAccountIDInvalid, err))
 		return
 	}
 
-	account, err := h.service.GetAccountByID(c.Request.Context(), int64(id))
+	account, err := h.service.GetAccountByID(c.Request.Context(), id)
 	if err != nil {
 		c.Error(err)
 		return

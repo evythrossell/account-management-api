@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
-	common "github.com/evythrossell/account-management-api/pkg"
 	"github.com/evythrossell/account-management-api/internal/core/domain"
 	"github.com/evythrossell/account-management-api/internal/core/port"
+	common "github.com/evythrossell/account-management-api/pkg"
 )
 
 type accountService struct {
@@ -17,25 +17,24 @@ func NewAccountService(repo port.AccountRepository) port.AccountService {
 	return &accountService{repo: repo}
 }
 
-func (service *accountService) CreateAccount(ctx context.Context, documentNumber string) (*domain.Account, error) {
-	acc, err := domain.NewAccount(documentNumber)
+func (service *accountService) CreateAccount(ctx context.Context, docNumber string) (*domain.Account, error) {
+	acc, err := domain.NewAccount(docNumber)
 	if err != nil {
-		return nil, err
+		return nil, common.NewValidationError(domain.ErrMsgDocumentInvalid, err)
 	}
 
-	_, err = service.repo.FindByDocument(ctx, documentNumber)
-	if err == nil {
-		return nil, common.ErrAccountAlreadyExists
+	savedAcc, err := service.repo.Save(ctx, acc)
+	if err != nil {
+		if errors.Is(err, common.ErrAccountAlreadyExists) {
+			return nil, common.NewConflictError(domain.ErrMsgAccountExists, err)
+		}
+		return nil, common.NewInternalError(domain.ErrMsgSaveAccountFailed, err)
 	}
 
-	if !errors.Is(err, common.ErrAccountNotFound) {
-		return nil, err
-	}
-
-	return service.repo.Save(ctx, acc)
+	return savedAcc, nil
 }
 
-func (service *accountService) GetAccount(ctx context.Context, documentNumber string) (*domain.Account, error) {
+func (service *accountService) GetAccountByDocument(ctx context.Context, documentNumber string) (*domain.Account, error) {
 	acc, err := service.repo.FindByDocument(ctx, documentNumber)
 	if err != nil {
 		return nil, err
@@ -44,11 +43,13 @@ func (service *accountService) GetAccount(ctx context.Context, documentNumber st
 	return acc, nil
 }
 
-func (service *accountService) GetAccountByID(ctx context.Context, accountID int64) (*domain.Account, error) {
-	acc, err := service.repo.FindByAccountID(ctx, accountID)
+func (s *accountService) GetAccountByID(ctx context.Context, id int64) (*domain.Account, error) {
+	acc, err := s.repo.FindByAccountID(ctx, id)
 	if err != nil {
-		return nil, err
+		if errors.Is(err, common.ErrAccountNotFound) {
+			return nil, common.NewNotFoundError(domain.ErrMsgAccountNotFound, err)
+		}
+		return nil, common.NewInternalError(domain.ErrMsgDatabaseError, err)
 	}
-
 	return acc, nil
 }

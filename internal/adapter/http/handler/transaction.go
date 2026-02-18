@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/evythrossell/account-management-api/internal/core/domain"
 	"github.com/evythrossell/account-management-api/internal/core/port"
 	"github.com/gin-gonic/gin"
 )
@@ -28,8 +29,8 @@ func (h *TransactionHandler) CreateTransaction(c *gin.Context) {
 	var req createTransactionRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"code":    "INVALID_BODY",
-			"message": "invalid request body or missing required fields",
+			"code":    domain.ErrCodeInvalidBody,
+			"message": domain.ErrMsgInvalidBodyRequest,
 		})
 		return
 	}
@@ -47,8 +48,8 @@ func (h *TransactionHandler) GetTransaction(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("transactionId"), 10, 64)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"code":    "INVALID_ID",
-			"message": "the transaction ID must be a valid integer",
+			"code":    domain.ErrCodeInvalidID,
+			"message": domain.ErrMsgTransactionIDInvalid,
 		})
 		return
 	}

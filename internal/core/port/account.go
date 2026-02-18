@@ -14,6 +14,6 @@ type AccountRepository interface {
 
 type AccountService interface {
 	CreateAccount(ctx context.Context, documentNumber string) (*domain.Account, error)
-	GetAccount(ctx context.Context, documentNumber string) (*domain.Account, error)
+	GetAccountByDocument(ctx context.Context, documentNumber string) (*domain.Account, error)
 	GetAccountByID(ctx context.Context, accountID int64) (*domain.Account, error)
 }

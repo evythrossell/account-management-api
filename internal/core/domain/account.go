@@ -2,19 +2,25 @@ package domain
 
 import (
 	"strings"
+	"unicode/utf8"
 
 	common "github.com/evythrossell/account-management-api/pkg"
 )
 
 type Account struct {
-	ID             int64
-	DocumentNumber string
+	ID             int64  `json:"account_id"`
+	DocumentNumber string `json:"document_number"`
 }
 
-func NewAccount(documentNumber string) (*Account, error) {
-	doc := strings.TrimSpace(documentNumber)
+func NewAccount(docNumber string) (*Account, error) {
+	doc := strings.TrimSpace(docNumber)
+	length := utf8.RuneCountInString(doc)
 
-	if !isValidDocument(doc) {
+	if length < 11 || length > 14 {
+		return nil, common.ErrInvalidDocument
+	}
+
+	if !isNumeric(doc) {
 		return nil, common.ErrInvalidDocument
 	}
 
@@ -23,18 +29,11 @@ func NewAccount(documentNumber string) (*Account, error) {
 	}, nil
 }
 
-func isValidDocument(document string) bool {
-	length := len(document)
-
-	if length != 11 && length != 14 {
-		return false
-	}
-
-	for _, char := range document {
-		if char < '0' || char > '9' {
+func isNumeric(s string) bool {
+	for _, c := range s {
+		if c < '0' || c > '9' {
 			return false
 		}
 	}
-
 	return true
 }

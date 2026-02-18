@@ -22,16 +22,19 @@ func NewPostgresAccountRepository(db *sql.DB) *PostgresAccountRepository {
 func (p *PostgresAccountRepository) Save(ctx context.Context, account *domain.Account) (*domain.Account, error) {
 	stmt := `INSERT INTO accounts (document_number) VALUES ($1) RETURNING account_id`
 
-	err := p.db.QueryRowContext(ctx, stmt, account.DocumentNumber).Scan(&account.ID)
+	var accountId int64
+	err := p.db.QueryRowContext(ctx, stmt, account.DocumentNumber).Scan(&accountId)
+
 	if err != nil {
 		var pgErr *pq.Error
 		if errors.As(err, &pgErr) {
 			if pgErr.Code == "23505" {
-				return nil, fmt.Errorf("%w: %v", common.ErrAccountAlreadyExists, err)
+				return nil, common.ErrAccountAlreadyExists
 			}
 		}
-		return nil, fmt.Errorf("save account: %w", err)
+		return nil, err
 	}
+	account.ID = accountId
 	return account, nil
 }
 
@@ -61,7 +64,7 @@ func (p *PostgresAccountRepository) FindByAccountID(ctx context.Context, account
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, common.ErrAccountNotFound
 		}
-		return nil, fmt.Errorf("infrastructure error: find account by id: %w", err)
+		return nil, fmt.Errorf("db error: %w", err)
 	}
 
 	return &acc, nil

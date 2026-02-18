@@ -26,5 +26,5 @@ func (h *HealthHandler) Check(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	c.JSON(http.StatusOK, gin.H{"status": "up"})
 }
