@@ -7,8 +7,14 @@ import (
 )
 
 var (
-	ErrAccountNotFound = errors.New("account not found")
-	ErrInvalidDocument = errors.New("invalid document format")
+	ErrAccountNotFound     = errors.New("account not found")
+	ErrTransactionNotFound = errors.New("transaction not found")
+
+	ErrInvalidDocument      = errors.New("invalid document format")
+	ErrAccountAlreadyExists = errors.New("account with this document already exists")
+
+	ErrInvalidAmount    = errors.New("amount must be greater than zero")
+	ErrInvalidOperation = errors.New("invalid operation type for transaction")
 )
 
 type DomainError struct {

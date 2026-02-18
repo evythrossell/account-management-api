@@ -31,3 +31,11 @@ type TransactionService interface {
 	CreateTransaction(ctx context.Context, accountID int64, operationType int16, amount float64) (*domain.Transaction, error)
 	GetByTransactionID(ctx context.Context, transactionID int64) (*domain.Transaction, error)
 }
+
+type HealthService interface {
+	Check(ctx context.Context) error
+}
+
+type DBHealthChecker interface {
+	PingContext(ctx context.Context) error
+}
