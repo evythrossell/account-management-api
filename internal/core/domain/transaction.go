@@ -8,11 +8,11 @@ import (
 )
 
 type Transaction struct {
-	ID              int64
-	AccountID       int64
-	OperationTypeID OperationType
-	Amount          float64
-	EventDate       time.Time
+	ID              int64         `json:"transaction_id"`
+	AccountID       int64         `json:"account_id"`
+	OperationTypeID OperationType `json:"operation_type_id"`
+	Amount          float64       `json:"amount"`
+	EventDate       time.Time     `json:"-"`
 }
 
 func NewTransaction(accountID int64, opType OperationType, amount float64) (*Transaction, error) {
