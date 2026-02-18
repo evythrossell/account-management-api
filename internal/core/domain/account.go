@@ -20,7 +20,20 @@ func NewAccount(docNumber string) (*Account, error) {
 		return nil, common.ErrInvalidDocument
 	}
 
+	if !isNumeric(doc) {
+		return nil, common.ErrInvalidDocument
+	}
+
 	return &Account{
 		DocumentNumber: doc,
 	}, nil
+}
+
+func isNumeric(s string) bool {
+	for _, c := range s {
+		if c < '0' || c > '9' {
+			return false
+		}
+	}
+	return true
 }
