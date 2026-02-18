@@ -2,6 +2,8 @@ package services
 
 import (
 	"context"
+	"errors"
+	"log"
 
 	"github.com/evythrossell/account-management-api/internal/core/domain"
 	"github.com/evythrossell/account-management-api/internal/core/port"
@@ -39,11 +41,16 @@ func (service *accountService) GetAccountByDocument(ctx context.Context, documen
 	return acc, nil
 }
 
-func (service *accountService) GetAccountByID(ctx context.Context, accountID int64) (*domain.Account, error) {
-	acc, err := service.repo.FindByAccountID(ctx, accountID)
+func (s *accountService) GetAccountByID(ctx context.Context, id int64) (*domain.Account, error) {
+	acc, err := s.repo.FindByAccountID(ctx, id)
 	if err != nil {
-		return nil, err
+		log.Printf("[DEBUG] Service - repo.FindByAccountID error: %T - %v", err, err)
+		if errors.Is(err, common.ErrAccountNotFound) {
+			log.Printf("[DEBUG] Service - error is ErrAccountNotFound, wrapping as NotFoundError")
+			return nil, common.NewNotFoundError("account not found", err)
+		}
+		log.Printf("[DEBUG] Service - error is not ErrAccountNotFound, wrapping as InternalError")
+		return nil, common.NewInternalError("database error", err)
 	}
-
 	return acc, nil
 }
