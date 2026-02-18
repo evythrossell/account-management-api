@@ -12,7 +12,7 @@ func SetupRouter(
 ) *gin.Engine {
 
 	router := gin.Default()
-	router.Use(middleware.ErrorHandler())
+	router.Use(middleware.Error())
 
 	router.GET("/health", healthHandler.Check)
 
