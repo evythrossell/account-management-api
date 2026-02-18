@@ -34,6 +34,7 @@ func (p *PostgresAccountRepository) Save(ctx context.Context, account *domain.Ac
 		}
 		return nil, err
 	}
+	account.ID = accountId
 	return account, nil
 }
 
@@ -63,7 +64,7 @@ func (p *PostgresAccountRepository) FindByAccountID(ctx context.Context, account
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, common.ErrAccountNotFound
 		}
-		return nil, fmt.Errorf("infrastructure error: find account by id: %w", err)
+		return nil, fmt.Errorf("db error: %w", err)
 	}
 
 	return &acc, nil

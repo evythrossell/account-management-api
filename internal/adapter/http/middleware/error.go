@@ -16,18 +16,25 @@ func Error() gin.HandlerFunc {
 			err := c.Errors.Last().Err
 
 			var de *common.DomainError
-
 			if errors.As(err, &de) {
 				c.AbortWithStatusJSON(de.HTTPStatusCode(), gin.H{
 					"code":    de.Code,
 					"message": de.PublicMessage(),
 				})
-			} else {
-				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-					"code":    "INTERNAL_SERVER_ERROR",
-					"message": "an unexpected error occurred",
-				})
+				return
 			}
+			if errors.Is(err, common.ErrAccountNotFound) {
+				c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+					"code":    "NOT_FOUND_ERROR",
+					"message": "account not found",
+				})
+				return
+			}
+
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"code":    "INTERNAL_SERVER_ERROR",
+				"message": "an unexpected error occurred",
+			})
 		}
 	}
 }

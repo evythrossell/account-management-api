@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 
 	"github.com/evythrossell/account-management-api/internal/core/domain"
 	"github.com/evythrossell/account-management-api/internal/core/port"
@@ -19,7 +20,7 @@ func NewAccountService(repo port.AccountRepository) port.AccountService {
 func (service *accountService) CreateAccount(ctx context.Context, docNumber string) (*domain.Account, error) {
 	acc, err := domain.NewAccount(docNumber)
 	if err != nil {
-		return nil, common.NewValidationError("document must be between 11 and 14 characters", err)
+		return nil, common.NewValidationError("document must be between 11 and 14 digits", err)
 	}
 
 	savedAcc, err := service.repo.Save(ctx, acc)
@@ -39,11 +40,13 @@ func (service *accountService) GetAccountByDocument(ctx context.Context, documen
 	return acc, nil
 }
 
-func (service *accountService) GetAccountByID(ctx context.Context, accountID int64) (*domain.Account, error) {
-	acc, err := service.repo.FindByAccountID(ctx, accountID)
+func (s *accountService) GetAccountByID(ctx context.Context, id int64) (*domain.Account, error) {
+	acc, err := s.repo.FindByAccountID(ctx, id)
 	if err != nil {
-		return nil, err
+		if errors.Is(err, common.ErrAccountNotFound) {
+			return nil, common.NewNotFoundError("account not found", err)
+		}
+		return nil, common.NewInternalError("database error", err)
 	}
-
 	return acc, nil
 }
