@@ -3,12 +3,12 @@ package container
 import (
 	"database/sql"
 
-	"github.com/evythrossell/account-management-api/config"
 	"github.com/evythrossell/account-management-api/internal/adapter/http/handler"
-	"github.com/evythrossell/account-management-api/internal/adapter/logger"
-	dbadapter "github.com/evythrossell/account-management-api/internal/adapter/repository"
+	dbadapter "github.com/evythrossell/account-management-api/internal/adapter/storage/postgres"
 	"github.com/evythrossell/account-management-api/internal/core/port"
 	service "github.com/evythrossell/account-management-api/internal/core/service"
+	config "github.com/evythrossell/account-management-api/internal/infrastructure"
+	logger "github.com/evythrossell/account-management-api/pkg"
 	_ "github.com/lib/pq"
 )
 

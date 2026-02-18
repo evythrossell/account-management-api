@@ -3,9 +3,9 @@ package services
 import (
 	"context"
 
-	"github.com/evythrossell/account-management-api/internal/core/common"
 	"github.com/evythrossell/account-management-api/internal/core/domain"
 	"github.com/evythrossell/account-management-api/internal/core/port"
+	common "github.com/evythrossell/account-management-api/pkg"
 )
 
 type transactionService struct {

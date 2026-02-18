@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/evythrossell/account-management-api/internal/core/common"
+	common "github.com/evythrossell/account-management-api/pkg"
 	"github.com/evythrossell/account-management-api/internal/core/domain"
 	"github.com/evythrossell/account-management-api/internal/core/port"
 )
