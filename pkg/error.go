@@ -36,32 +36,22 @@ func (e *DomainError) Unwrap() error {
 
 func (e *DomainError) HTTPStatusCode() int {
 	switch e.Code {
-	case ErrValidation.Code:
+	case "VALIDATION_ERROR":
 		return http.StatusBadRequest
-	case ErrConflict.Code:
+	case "CONFLICT_ERROR":
 		return http.StatusConflict
-	case ErrNotFound.Code:
+	case "NOT_FOUND_ERROR":
 		return http.StatusNotFound
-	case ErrInternal.Code:
-		return http.StatusInternalServerError
 	default:
 		return http.StatusInternalServerError
 	}
 }
 
 func (e *DomainError) PublicMessage() string {
-	switch e.Code {
-	case ErrValidation.Code:
-		return "Invalid request format"
-	case ErrConflict.Code:
-		return "Document number already registered"
-	case ErrNotFound.Code:
-		return "Resource not found"
-	case ErrInternal.Code:
-		return "Internal server error"
-	default:
-		return "An unexpected error occurred"
+	if e.Message != "" {
+		return e.Message
 	}
+	return "An unexpected error occurred"
 }
 
 var (
