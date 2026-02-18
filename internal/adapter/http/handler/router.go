@@ -3,6 +3,8 @@ package handler
 import (
 	"github.com/evythrossell/account-management-api/internal/adapter/http/middleware"
 	"github.com/gin-gonic/gin"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	swaggerFiles "github.com/swaggo/files"
 )
 
 func SetupRouter(
@@ -13,6 +15,8 @@ func SetupRouter(
 
 	router := gin.Default()
 	router.Use(middleware.Error())
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	router.GET("/health", healthHandler.Check)
 

@@ -67,6 +67,18 @@ func TestTransactionService(t *testing.T) {
 		assert.ErrorIs(t, err, common.ErrAccountNotFound)
 	})
 
+	t.Run("CreateTransaction - Account Error (other than not found)", func(t *testing.T) {
+		accRepo := new(MockAccountRepository)
+		svc := services.NewTransactionService(accRepo, nil, nil)
+
+		accRepo.On("FindByAccountID", ctx, int64(1)).Return(nil, errors.New("db connection error"))
+
+		_, err := svc.CreateTransaction(ctx, 1, 4, 50.0)
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "database error")
+	})
+
 	t.Run("CreateTransaction - OpRepo Error", func(t *testing.T) {
 		accRepo := new(MockAccountRepository)
 		opRepo := new(MockOperationRepository)
@@ -77,7 +89,8 @@ func TestTransactionService(t *testing.T) {
 
 		_, err := svc.CreateTransaction(ctx, 1, 4, 50.0)
 
-		assert.EqualError(t, err, "db error")
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "database error")
 	})
 
 	t.Run("CreateTransaction - Invalid Operation Type", func(t *testing.T) {
@@ -121,6 +134,52 @@ func TestTransactionService(t *testing.T) {
 		assert.EqualError(t, err, "save error")
 	})
 
+	t.Run("CreateTransaction - Payment Operation", func(t *testing.T) {
+		accRepo := new(MockAccountRepository)
+		opRepo := new(MockOperationRepository)
+		txRepo := new(MockTransactionRepository)
+		svc := services.NewTransactionService(accRepo, txRepo, opRepo)
+
+		accRepo.On("FindByAccountID", ctx, int64(1)).Return(&domain.Account{ID: 1}, nil)
+		opRepo.On("Exists", ctx, int16(1)).Return(true, nil) // Payment is 1
+		txRepo.On("Save", ctx, mock.Anything).Return(&domain.Transaction{ID: 50}, nil)
+
+		res, err := svc.CreateTransaction(ctx, 1, 1, 25.0)
+
+		assert.NoError(t, err)
+		assert.NotNil(t, res)
+	})
+
+	t.Run("CreateTransaction - Domain Error (generic)", func(t *testing.T) {
+		accRepo := new(MockAccountRepository)
+		opRepo := new(MockOperationRepository)
+		svc := services.NewTransactionService(accRepo, nil, opRepo)
+
+		accRepo.On("FindByAccountID", ctx, int64(1)).Return(&domain.Account{}, nil)
+		opRepo.On("Exists", ctx, mock.Anything).Return(true, nil)
+
+		_, err := svc.CreateTransaction(ctx, 1, 99, 50.0)
+
+		assert.Error(t, err)
+		assert.ErrorIs(t, err, common.ErrInvalidOperation)
+	})
+
+	t.Run("CreateTransaction - Withdrawal Operation", func(t *testing.T) {
+		accRepo := new(MockAccountRepository)
+		opRepo := new(MockOperationRepository)
+		txRepo := new(MockTransactionRepository)
+		svc := services.NewTransactionService(accRepo, txRepo, opRepo)
+
+		accRepo.On("FindByAccountID", ctx, int64(1)).Return(&domain.Account{ID: 1}, nil)
+		opRepo.On("Exists", ctx, int16(3)).Return(true, nil) // Withdrawal is 3
+		txRepo.On("Save", ctx, mock.Anything).Return(&domain.Transaction{ID: 51}, nil)
+
+		res, err := svc.CreateTransaction(ctx, 1, 3, 15.0)
+
+		assert.NoError(t, err)
+		assert.NotNil(t, res)
+	})
+
 	t.Run("GetByTransactionID - Success", func(t *testing.T) {
 		txRepo := new(MockTransactionRepository)
 		svc := services.NewTransactionService(nil, txRepo, nil)
@@ -133,7 +192,33 @@ func TestTransactionService(t *testing.T) {
 		assert.Equal(t, int64(100), res.ID)
 	})
 
-	t.Run("GetByTransactionID - Error", func(t *testing.T) {
+	t.Run("GetByTransactionID - Not Found", func(t *testing.T) {
+		txRepo := new(MockTransactionRepository)
+		svc := services.NewTransactionService(nil, txRepo, nil)
+
+		txRepo.On("FindByTransactionID", ctx, int64(999)).Return(nil, common.ErrTransactionNotFound)
+
+		res, err := svc.GetByTransactionID(ctx, 999)
+
+		assert.Error(t, err)
+		assert.Nil(t, res)
+		assert.ErrorIs(t, err, common.ErrTransactionNotFound)
+	})
+
+	t.Run("GetByTransactionID - Database Error", func(t *testing.T) {
+		txRepo := new(MockTransactionRepository)
+		svc := services.NewTransactionService(nil, txRepo, nil)
+
+		txRepo.On("FindByTransactionID", ctx, int64(100)).Return(nil, errors.New("connection failed"))
+
+		res, err := svc.GetByTransactionID(ctx, 100)
+
+		assert.Error(t, err)
+		assert.Nil(t, res)
+		assert.Contains(t, err.Error(), "database error")
+	})
+
+	t.Run("GetByTransactionID - Generic Error", func(t *testing.T) {
 		txRepo := new(MockTransactionRepository)
 		svc := services.NewTransactionService(nil, txRepo, nil)
 
@@ -142,5 +227,47 @@ func TestTransactionService(t *testing.T) {
 		_, err := svc.GetByTransactionID(ctx, 100)
 
 		assert.Error(t, err)
+	})
+
+	t.Run("CreateTransaction - OpRepo Exists Error", func(t *testing.T) {
+		accRepo := new(MockAccountRepository)
+		opRepo := new(MockOperationRepository)
+		svc := services.NewTransactionService(accRepo, nil, opRepo)
+
+		accRepo.On("FindByAccountID", ctx, int64(1)).Return(&domain.Account{}, nil)
+		opRepo.On("Exists", ctx, mock.Anything).Return(false, errors.New("database error"))
+
+		_, err := svc.CreateTransaction(ctx, 1, 4, 50.0)
+
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "database error")
+	})
+
+	t.Run("CreateTransaction - Zero Amount", func(t *testing.T) {
+		accRepo := new(MockAccountRepository)
+		opRepo := new(MockOperationRepository)
+		svc := services.NewTransactionService(accRepo, nil, opRepo)
+
+		accRepo.On("FindByAccountID", ctx, int64(1)).Return(&domain.Account{}, nil)
+		opRepo.On("Exists", ctx, mock.Anything).Return(true, nil)
+
+		_, err := svc.CreateTransaction(ctx, 1, 4, 0)
+
+		assert.Error(t, err)
+		assert.ErrorIs(t, err, common.ErrInvalidAmount)
+	})
+
+	t.Run("CreateTransaction - Negative Amount", func(t *testing.T) {
+		accRepo := new(MockAccountRepository)
+		opRepo := new(MockOperationRepository)
+		svc := services.NewTransactionService(accRepo, nil, opRepo)
+
+		accRepo.On("FindByAccountID", ctx, int64(1)).Return(&domain.Account{}, nil)
+		opRepo.On("Exists", ctx, mock.Anything).Return(true, nil)
+
+		_, err := svc.CreateTransaction(ctx, 1, 4, -50.0)
+
+		assert.Error(t, err)
+		assert.ErrorIs(t, err, common.ErrInvalidAmount)
 	})
 }
