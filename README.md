@@ -1,6 +1,6 @@
 <p align="center">
   <a>
-    <img src="account-management-api.svg" height="350" width="500" alt="product-fee" />
+    <img src="docs/account-management-api.svg" height="350" width="500" alt="product-fee" />
   </a>
 </p>
 <p align='center'>
